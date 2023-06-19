@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFonts,    
   Poppins_100Thin,
   Poppins_200ExtraLight,
@@ -10,8 +10,8 @@ import { useFonts,
   Poppins_800ExtraBold,
   Poppins_900Black
 } from '@expo-google-fonts/poppins';
+import axios from 'axios'
 import AppNavigator from './src/navigation/appNavigator';
-import RegistrationScreen from './src/screens/RegistrationScreen';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -26,8 +26,20 @@ export default function App() {
     Poppins_900Black
   });
 
- 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://10.0.2.2:5000/');
+        console.log(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <RegistrationScreen/>
+    fontsLoaded ? <AppNavigator/> : null
   );
 }

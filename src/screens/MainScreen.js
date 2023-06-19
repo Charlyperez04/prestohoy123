@@ -22,13 +22,13 @@ const MainScreen = ({ navigation }) => {
         <Text style={styles.subtitle}>El credito del pueblo, para el pueblo</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonPink} onPress={() => { setModalVisible(true); setRole('client'); }}>
+        <TouchableOpacity style={styles.buttonPink} onPress={()=>navigation.navigate('Login',{ role: 'client' })}>
           <Text style={styles.buttonTextWhite}>Soy Comprador</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonPink} onPress={() => { setModalVisible(true); setRole('owner'); }}>
+        <TouchableOpacity style={styles.buttonPink} onPress={()=>navigation.navigate('Login',{ role: 'shop' })}>
           <Text style={styles.buttonTextWhite}>Soy Vendedor</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonGrey} onPress={() => { /* Navega a la pantalla de registro */ }}>
+        <TouchableOpacity style={styles.buttonGrey} onPress={()=>navigation.navigate('Registration')}>
           <Text style={styles.buttonTextGrey}>Regístrate Aquí</Text>
         </TouchableOpacity>
       </View>
