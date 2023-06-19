@@ -4,7 +4,17 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { View, Text, TextInput, TouchableOpacity, FlatList, Modal, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  Modal,
+  Image,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import arrow from "../../assets/arrow.png";
 import ModalSendNotification from "./Modals/SendNotification";
 import ModalNotificationSent from "./Modals/SentNotification";
@@ -14,7 +24,7 @@ import api from "../../api/connection";
 import AddShopModal from "./Modals/AddShop";
 import { ScrollView } from "react-native-gesture-handler";
 
-function ShopScreen({navigation}) {
+function ShopScreen({ navigation }) {
   const [searchText, setSearchText] = useState("");
   const [selectedClient, setSelectedClient] = useState(null);
   const [modalSendNotification, setModalSendNotification] = useState(false);
@@ -60,9 +70,8 @@ function ShopScreen({navigation}) {
         if (token !== null && id !== null) {
           // Realizar la petición GET con Axios
           let [responseShops] = await Promise.all([
-          
             api.get(`/owner/shops`, { headers: { Authorization: token } }),
-          ,
+            ,
           ]);
 
           // Actualizar el estado con los datos recibidos
@@ -144,7 +153,7 @@ function ShopScreen({navigation}) {
 
   const handleClientPress = (shopId) => {
     try {
-      setRefreshData(!refreshData)
+      setRefreshData(!refreshData);
       const shop = shops.find((shop) => shop._id === shopId);
       setSelectedClient(shop);
     } catch (error) {
@@ -161,7 +170,7 @@ function ShopScreen({navigation}) {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleClientPress(item._id) }>
+    <TouchableOpacity onPress={() => handleClientPress(item._id)}>
       <View style={styles.clientBlock}>
         <Image source={{ uri: item.profilePhoto }} style={{ width: 50, height: 50 }} />
         <Text>{item.name}</Text>
@@ -220,83 +229,90 @@ function ShopScreen({navigation}) {
           </Text>
         </TouchableOpacity>
 
-        <AddShopModal visible={isModalAddShopVisible} closeModal={handleCloseModalAddShop} refreshData={refreshData} setRefreshData={setRefreshData}/>
+        <AddShopModal
+          visible={isModalAddShopVisible}
+          closeModal={handleCloseModalAddShop}
+          refreshData={refreshData}
+          setRefreshData={setRefreshData}
+        />
         <FlatList data={filteredShops} renderItem={renderItem} keyExtractor={(item) => item._id} />
 
         {selectedClient && (
           <Modal visible={!!selectedClient} animationType="slide" onRequestClose={handleCloseModal}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalHeader}>
-                <Icon onPress={handleCloseModal} name="keyboard-backspace" size={40} color="#000" />
-              </View>
-              <Image source={{ uri: selectedClient.profilePhoto }} style={styles.modalUserImage} />
+            <SafeAreaProvider>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalHeader}>
+                  <Icon onPress={handleCloseModal} name="keyboard-backspace" size={40} color="#000" />
+                </View>
+                <Image source={{ uri: selectedClient.profilePhoto }} style={styles.modalUserImage} />
 
-              <Text style={styles.modalUserName}>{selectedClient.name}</Text>
+                <Text style={styles.modalUserName}>{selectedClient.name}</Text>
 
-              <Text style={styles.sectionTitle}>Datos del negocio</Text>
+                <Text style={styles.sectionTitle}>Datos del negocio</Text>
 
-              <ScrollView style={styles.userDataContainer}>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Dueño: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.bossName}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Nombre: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.name}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Dirección: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.address}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Número de tarjeta: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.cardNumber}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Banco: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.bank}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Giro: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.giro}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Link: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.link}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Contraseña: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.password}</Text>
-                </View>
-                <View style={styles.userDataLine}>
-                  <Text style={styles.userDataName}>Número telefónico: </Text>
-                  <Text style={styles.userDataText}>{selectedClient.number}</Text>
-                </View>
-              </ScrollView>
+                <ScrollView style={styles.userDataContainer}>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Dueño: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.bossName}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Nombre: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.name}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Dirección: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.address}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Número de tarjeta: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.cardNumber}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Banco: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.bank}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Giro: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.giro}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Link: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.link}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Contraseña: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.password}</Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Número telefónico: </Text>
+                    <Text style={styles.userDataText}>{selectedClient.number}</Text>
+                  </View>
+                </ScrollView>
 
-              <TouchableOpacity onPress={handleOpenModalEdit} style={styles.sendNotificationButton}>
-                <EditShopModal
-                  visible={modalEditShop}
-                  closeModal={handleCloseModalEdit}
-                  idShop={selectedClient._id}
-                  refreshData={refreshData}
-                  setRefreshData={setRefreshData}
+                <TouchableOpacity onPress={handleOpenModalEdit} style={styles.sendNotificationButton}>
+                  <EditShopModal
+                    visible={modalEditShop}
+                    closeModal={handleCloseModalEdit}
+                    idShop={selectedClient._id}
+                    refreshData={refreshData}
+                    setRefreshData={setRefreshData}
+                  />
+                  <Text style={styles.sendNotificationButtonText}>Editar datos de negocio</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.deleteUserButton} onPress={openModalDeleteShop}>
+                  <Text style={styles.deleteUserButtonText}>Borrar negocio</Text>
+                </TouchableOpacity>
+
+                <ModalSendNotification visible={modalSendNotification} onClose={closeModalNotification} />
+
+                <ModalDeleteShop
+                  visible={modalDeleteShop}
+                  onConfirm={handleDeleteShop}
+                  onCancel={closeModalDeleteShop}
                 />
-                <Text style={styles.sendNotificationButtonText}>Editar datos de negocio</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.deleteUserButton} onPress={openModalDeleteShop}>
-                <Text style={styles.deleteUserButtonText}>Borrar negocio</Text>
-              </TouchableOpacity>
-
-              <ModalSendNotification visible={modalSendNotification} onClose={closeModalNotification} />
-
-              <ModalDeleteShop
-                visible={modalDeleteShop}
-                onConfirm={handleDeleteShop}
-                onCancel={closeModalDeleteShop}
-              />
-            </View>
+              </View>
+            </SafeAreaProvider>
           </Modal>
         )}
       </View>
@@ -352,7 +368,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   modalContainer: {
-    flex: 1,
+    ...Platform.select({
+      ios: {
+        flex: 1,
+        backgroundColor: "white",
+        marginTop: 50,
+      },
+      android: {
+        lex: 1,
+        backgroundColor: "white",
+        marginTop: 20,
+      },
+    }),
   },
   modalHeader: {
     flexDirection: "row",
@@ -447,7 +474,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-    maxHeight:350
+    maxHeight: 350,
   },
   userDataLine: {
     flexDirection: "row",
@@ -465,7 +492,6 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: 16,
     alignSelf: "center",
-
   },
   userDataImage: {
     width: 50,

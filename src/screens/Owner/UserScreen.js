@@ -387,7 +387,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   modalContainer: {
-    flex: 1,
+    ...Platform.select({
+      ios:{
+      flex: 1,
+      backgroundColor: "white",
+      marginTop:50
+      },android:{
+        lex: 1,
+      backgroundColor: "white",
+      marginTop:20
+      }
+    }),
   },
   modalHeader: {
     flexDirection: "row",
