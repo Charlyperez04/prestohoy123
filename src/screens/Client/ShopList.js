@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
   businessList: {
     width: "100%",
     paddingHorizontal: 20,
+    paddingTop:10
   },
   item: {
     flexDirection: "row",
@@ -149,7 +150,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     borderColor: "#E5E5E5",
-    borderWidth: 1,
   },
   image: {
     width: 50,
