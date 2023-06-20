@@ -94,21 +94,23 @@ const LoginScreen = ({ navigation, route }) => {
       if (response.data.token) {
         console.log("SIUUUUUU");
         console.log(response.data);
-  
+      
         // Guardar el token y el rol en AsyncStorage
-        await AsyncStorage.setItem('userToken', response.data.token);
-        await AsyncStorage.setItem('userRole', response.data.role);
-        await AsyncStorage.setItem('userId',response.data.id)
-  
+        const asyncStorageOperations = [
+          AsyncStorage.setItem('userToken', response.data.token),
+          AsyncStorage.setItem('userRole', response.data.role),
+          AsyncStorage.setItem('userId',response.data.id),
+        ];
+      
         // Extraer la fecha de expiración del token
         const tokenParts = response.data.token.split('.');
         const payload = tokenParts[1];
         const decodedPayload = JSON.parse(Buffer.from(payload, 'base64').toString());
         const expiryDate = decodedPayload.exp;
-  
+      
         // Guardar la fecha de expiración en AsyncStorage
-        await AsyncStorage.setItem('tokenExpiry', expiryDate.toString());
-  
+        asyncStorageOperations.push(AsyncStorage.setItem('tokenExpiry', expiryDate.toString()));
+      
         // Si el rol del usuario es 'owner', solicitar autenticación biométrica
         if (response.data.role === "owner") {  // Aquí está el cambio
           const biometricSuccess = await handleBiometricLogin();
@@ -117,21 +119,25 @@ const LoginScreen = ({ navigation, route }) => {
             console.log("La autenticación biométrica falló");
           }
         }
+      
+        // Espera hasta que todos los datos se guarden en AsyncStorage
+        await Promise.all(asyncStorageOperations);
         switch (response.data.role) {
           case 'owner':
-            navigation.navigate('OwnerScreens');
+            navigation.replace('OwnerScreens');
             break;
           case 'shop':
-            navigation.navigate('ShopScreens');
+            navigation.replace('ShopScreens');
             break;
           case 'client':
-            navigation.navigate('ClientScreens');
+            navigation.replace('ClientScreens');
             break;
           default:
-            navigation.navigate('Main');
+            navigation.replace('Main');
         }
-        testStorage()
-      } else {
+        testStorage();
+  
+      } else {      
         // Aquí puedes manejar el caso en que el servidor no devuelva un token, lo que probablemente significa que las credenciales no son correctas
       }
     } catch (error) {
@@ -143,6 +149,7 @@ const LoginScreen = ({ navigation, route }) => {
       console.log(error);
     }
   };
+  
   
   
   const testStorage = async () => {
