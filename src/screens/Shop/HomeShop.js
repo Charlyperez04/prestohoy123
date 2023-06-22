@@ -15,7 +15,7 @@ import {
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList,Modal,ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import logout from "../../assets/logout.png";
 import arrow from "../../assets/arrow.png";
@@ -44,8 +44,10 @@ function HomeScreenShop({ navigation }) {
   const [amount, setAmount] = useState('')
   const [nip,setNip]=useState('')
   const [transactionData,setTransactionData]=useState('')
+  const [isLoading,setIsLoading]=useState(false)
 
   useEffect(() => {
+    setIsLoading(true)
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -78,9 +80,11 @@ function HomeScreenShop({ navigation }) {
     };
 
     fetchData();
+    setIsLoading(false)
   }, []);
 
   async function handleLogout() {
+    
     await AsyncStorage.clear(); // this clears all data in async storage
     await Updates.reloadAsync(); // this restarts the JavaScript application
   }
@@ -187,6 +191,18 @@ function HomeScreenShop({ navigation }) {
         amount={transactionData.amount}
 
         />
+         <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
         <TransactionData clientName={client.name} maxCredit={client.maxCredit} usedCredit={client.usedCredit} transactionDataVisible={transactionDataVisible}
         setTransactionDataVisible={setTransactionDataVisible} amount={amount}
         setAmount={setAmount}

@@ -15,7 +15,7 @@ import {
   Poppins_800ExtraBold,
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Modal } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Modal,ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import trash from "../../assets/trash.png";
@@ -42,8 +42,10 @@ function HomeScreen({ navigation }) {
   const [shops, setShops] = useState("");
   const [clients, setClients] = useState("");
   const [reloadScreen, setReloadScreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true)
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -87,9 +89,11 @@ function HomeScreen({ navigation }) {
           setClientsLength(responseClients.data.length);
           setShopsLength(responseShops.data.length);
         }
+        setIsLoading(false)
       } catch ({ error, response }) {
         console.error(error);
         console.log(response);
+        setIsLoading(false)
       }
     };
 
@@ -213,6 +217,18 @@ function HomeScreen({ navigation }) {
             paddingHorizontal: 30,
           }}
         >
+           <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
           <View style={styles.dataBlock}>
             <Text style={styles.dataTitleBlock}>Total Otorgado</Text>
             <Text style={styles.dataTextBlock}>${totalCredit}</Text>

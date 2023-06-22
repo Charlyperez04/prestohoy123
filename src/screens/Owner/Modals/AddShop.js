@@ -1,5 +1,5 @@
-
-import AsyncStorage from "@react-native-async-storage/async-storage";import React, { useState,useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Text,
@@ -8,37 +8,29 @@ import {
   TextInput,
   StyleSheet,
   Image,
+  ActivityIndicator,
 } from "react-native";
-import api from '../../../api/connection'
+import api from "../../../api/connection";
 import * as ImagePicker from "expo-image-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import EditModalConfirmation from "./EditModalConfirmation";
 
-const AddShopModal = ({
-  visible,
-  closeModal,
-  refreshData,
-  setRefreshData
-}) => {
+const AddShopModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] =
-    useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
-  const [cardNumber, setCardNumber] =
-    useState("");
+  const [cardNumber, setCardNumber] = useState("");
   const [bankName, setBankName] = useState("");
   const [fieldName, setFieldName] = useState("");
   const [linkName, setLinkName] = useState("");
-  const [profileImage, setProfileImage] =
-    useState(null);
-  const [
-    confirmationVisible,
-    setConfirmationVisible,
-  ] = useState(false);
-  
-  const handleConfirm = async() => {
+  const [profileImage, setProfileImage] = useState(null);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("userToken");
 
@@ -78,12 +70,12 @@ const AddShopModal = ({
           "Content-Type": "multipart/form-data",
         },
       });
-
+      setIsLoading(false);
       console.log(response);
       setConfirmationVisible(true);
-      
     } catch (error) {
       console.error(error);
+      setIsLoading(false);
       // Here you could handle errors from the request, or the error we threw if no image was selected
     }
     // Abre el modal de confirmación
@@ -99,30 +91,21 @@ const AddShopModal = ({
   };
 
   const selectImage = async (setImage) => {
-    const { status } =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
-      alert(
-        "Se requiere acceso a la galería para seleccionar una imagen."
-      );
+      alert("Se requiere acceso a la galería para seleccionar una imagen.");
       return;
     }
 
-    const result =
-      await ImagePicker.launchImageLibraryAsync({
-        mediaTypes:
-          ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
 
-    if (
-      !result.canceled &&
-      result.assets &&
-      result.assets.length > 0
-    ) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setImage(result.assets[0].uri);
     }
   };
@@ -134,34 +117,21 @@ const AddShopModal = ({
   };
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={closeModal}
-    >
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={closeModal}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <ScrollView>
-            <Text style={styles.modalTitle}>
-              Crear negocio
-            </Text>
-            <Text style={styles.modalSubtitle}>
-              Llene todos los datos
-            </Text>
+            <Text style={styles.modalTitle}>Crear negocio</Text>
+            <Text style={styles.modalSubtitle}>Llene todos los datos</Text>
 
-            <Text style={styles.textCamp}>
-              Nombre del negocio:
-            </Text>
+            <Text style={styles.textCamp}>Nombre del negocio:</Text>
             <TextInput
               placeholder="Nombre"
               style={styles.textInput}
               value={fullName}
               onChangeText={setFullName}
             />
-            <Text style={styles.textCamp}>
-              Nombre del propietario:
-            </Text>
+            <Text style={styles.textCamp}>Nombre del propietario:</Text>
             <TextInput
               placeholder="Nombre del propietario"
               style={styles.textInput}
@@ -169,9 +139,7 @@ const AddShopModal = ({
               onChangeText={setOwnerName}
             />
 
-            <Text style={styles.textCamp}>
-              Número telefónico:
-            </Text>
+            <Text style={styles.textCamp}>Número telefónico:</Text>
             <TextInput
               placeholder="Número telefónico"
               style={styles.textInput}
@@ -179,18 +147,14 @@ const AddShopModal = ({
               onChangeText={setPhoneNumber}
             />
 
-            <Text style={styles.textCamp}>
-              Número de tarjeta o CLABE:
-            </Text>
+            <Text style={styles.textCamp}>Número de tarjeta o CLABE:</Text>
             <TextInput
               placeholder="1234 5678 9123 4569"
               style={styles.textInput}
               value={cardNumber}
               onChangeText={setCardNumber}
             />
-            <Text style={styles.textCamp}>
-              Link:
-            </Text>
+            <Text style={styles.textCamp}>Link:</Text>
             <TextInput
               placeholder="Link a la pagina o numero del negocio"
               style={styles.textInput}
@@ -198,9 +162,7 @@ const AddShopModal = ({
               onChangeText={setLinkName}
             />
 
-            <Text style={styles.textCamp}>
-              Banco:
-            </Text>
+            <Text style={styles.textCamp}>Banco:</Text>
             <TextInput
               placeholder="Nombre del banco"
               style={styles.textInput}
@@ -208,9 +170,7 @@ const AddShopModal = ({
               onChangeText={setBankName}
             />
 
-            <Text style={styles.textCamp}>
-              Giro:
-            </Text>
+            <Text style={styles.textCamp}>Giro:</Text>
             <TextInput
               placeholder="Ej. Abarrotes"
               style={styles.textInput}
@@ -218,9 +178,7 @@ const AddShopModal = ({
               onChangeText={setFieldName}
             />
 
-            <Text style={styles.textCamp}>
-              Dirección:
-            </Text>
+            <Text style={styles.textCamp}>Dirección:</Text>
             <TextInput
               placeholder="Dirección"
               style={styles.textInput}
@@ -228,52 +186,40 @@ const AddShopModal = ({
               onChangeText={setAddress}
             />
 
-            <Text style={styles.textCamp}>
-              Contraseña:
-            </Text>
+            <Text style={styles.textCamp}>Contraseña:</Text>
             <TextInput
               placeholder="Contraseña"
               style={styles.textInput}
               value={password}
               onChangeText={setPassword}
             />
-
-            <Text style={styles.textCamp}>
-              Foto de perfil:
-            </Text>
-            <TouchableOpacity
-              style={styles.formInputFotos}
-              onPress={() =>
-                selectImage(setProfileImage)
-              }
-            >
+            <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
+            <Text style={styles.textCamp}>Foto de perfil:</Text>
+            <TouchableOpacity style={styles.formInputFotos} onPress={() => selectImage(setProfileImage)}>
               {profileImage ? (
-                <Image
-                  source={{ uri: profileImage }}
-                  style={styles.imagePreview}
-                />
+                <Image source={{ uri: profileImage }} style={styles.imagePreview} />
               ) : (
-                <Text>
-                  Seleccionar foto de perfil
-                </Text>
+                <Text>Seleccionar foto de perfil</Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handleConfirm}
-            >
-              <Text
-                style={styles.confirmButtonText}
-              >
-                Agregar negocio
-              </Text>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+              <Text style={styles.confirmButtonText}>Agregar negocio</Text>
             </TouchableOpacity>
 
             <EditModalConfirmation
               visible={confirmationVisible}
-              closeModal={
-                handleCloseConfirmationModal
-              }
+              closeModal={handleCloseConfirmationModal}
               refreshData={refreshData}
               setRefreshData={setRefreshData}
             />

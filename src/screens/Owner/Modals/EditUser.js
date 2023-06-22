@@ -1,20 +1,20 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState, useEffect } from "react";
-import { Modal, Text, TouchableOpacity, View, TextInput, StyleSheet, Image } from "react-native";
+import { Modal, Text, TouchableOpacity, View, TextInput, StyleSheet, Image,ActivityIndicator } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import EditModalConfirmation from "./EditModalConfirmation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../api/connection";
-import * as Updates from 'expo-updates'
+import * as Updates from "expo-updates";
 
-const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshData }) => {
+const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshData }) => {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
-  const [pin, setPin] = useState();
+  const [pin, setPin] = useState("");
   const [maxCredit, setMaxCredit] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const [ineFrontImage, setIneFrontImage] = useState(null);
@@ -26,18 +26,23 @@ const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshDat
   const [dateSet, setDateSet] = useState(false);
   const [mode, setMode] = useState("date");
   const [isLoading, setIsLoading] = useState(false);
-
+  const[fechaCorte,setFechaCorte]=useState("")
+  const [fechaPago,setFechaPago]=useState("")
+  const [montoFinal,setMontoFinal]=useState("")
+  const [usedCredit,setUsedCredit]=useState("")
+  
+  
   useEffect(() => {
     const fetchData = async () => {
-      try { 
+      try {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
-
+        
         if (token !== null) {
           setUserToken(token);
         }
-
+        
         if (token !== null) {
           // Realizar la petición GET con Axios
           let [responseClient] = await Promise.all([
@@ -45,11 +50,10 @@ const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshDat
               headers: { Authorization: token },
             }),
           ]);
-
+          setUsedCredit(responseClient.data.client.usedCredit);
           setFullName(responseClient.data.client.name);
           setPhoneNumber(responseClient.data.client.phoneNumber);
           setDateOfBirth(responseClient.data.client.bornDate);
-
           setAddress(responseClient.data.client.address);
           setPin(responseClient.data.client.pin);
           setMaxCredit(responseClient.data.client.maxCredit);
@@ -57,13 +61,17 @@ const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshDat
           setIneFrontImage(responseClient.data.client.frontIne);
           setIneBackImage(responseClient.data.client.backIne);
           setPassword(responseClient.data.client.password);
+          setFechaCorte(responseClient.data.client.fechaCorte)
+          setFechaPago(responseClient.data.client.fechaPago)
+          setMontoFinal(responseClient.data.client.montoFinal)
+          
         }
       } catch ({ error, response }) {
         console.error(error);
         console.log(response.data);
       }
     };
-
+    
     fetchData();
   }, []);
   const onChange = (event, selectedDate) => {
@@ -71,20 +79,20 @@ const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshDat
     setShow(Platform.OS === "ios");
     setDate(currentDate);
     setDateSet(true);
-
+    
     setDateOfBirth(currentDate.toDateString());
   };
   const showDatepicker = () => {
     showMode("date");
   };
   const handleConfirm = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true)
-     
-      const token = userToken;
-  
-      const formData = new FormData();
 
+      const token = await AsyncStorage.getItem("userToken");
+      
+      const formData = new FormData();
+      
       // Add all the text data
       formData.append("name", fullName);
       formData.append("phoneNumber", phoneNumber);
@@ -93,35 +101,46 @@ const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshDat
       formData.append("pin", pin);
       formData.append("maxCredit", maxCredit);
       formData.append("bornDate", dateOfBirth);
-
+      formData.append("usedCredit", usedCredit);
+     if(fechaCorte&&fechaPago&&montoFinal){
+      formData.append("fechaCorte", fechaCorte);
+      formData.append("fechaPago", fechaPago);
+      formData.append("montoFinal", montoFinal);
+     }
 
       // Ensure that an image has been selected
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
       }
-
+      
       // Add the image
       const uriParts = profileImage.split(".");
       const fileType = uriParts[uriParts.length - 1];
-
+      
       formData.append("profilePhoto", {
         uri: profileImage,
         name: `photo.${fileType}`,
         type: `image/${fileType}`,
-      })
-      if(!ineFrontImage){
-        throw new Error('Seleccione una frontal de ine')
+      });
+      if (!ineFrontImage) {
+        Alert.alert(
+          "Error",
+          'Seleccione una foto frontal de INE'
+        );
       }
-
+      
       const uriPartsFront = ineFrontImage.split(".");
       const fileTypeFront = uriPartsFront[uriPartsFront.length - 1];
       formData.append("frontIne", {
         uri: ineFrontImage,
         name: `photo.${fileTypeFront}`,
         type: `image/${fileTypeFront}`,
-      })
-      if(!ineBackImage){
-        throw new Error('Seleccione una trasera de ine')
+      });
+      if (!ineBackImage) {
+        Alert.alert(
+          "Error",
+          'Seleccione una foto trasera de INE'
+        );
       }
       const uriPartsBack = ineBackImage.split(".");
       const fileTypeBack = uriPartsBack[uriPartsBack.length - 1];
@@ -129,22 +148,30 @@ const EditUserModal = ({ visible, closeModal, idClient,refreshData,setRefreshDat
         uri: ineBackImage,
         name: `photo.${fileTypeBack}`,
         type: `image/${fileTypeBack}`,
-      })
+      });
 
-await api.put(`/owner/clients/${idClient}`, formData, {
-  headers: {
-    Authorization: token,
-    "Content-Type": "multipart/form-data",
-  },
-});
-  
-    
-      setConfirmationVisible(true);
+      let response=await api.put(`/owner/clients/${idClient}`, formData, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data);
       setIsLoading(false)
-    } catch (error) {
-      console.error(error);
+      setConfirmationVisible(true);
+      
+} catch (error) {
+  console.error(error);
+  console.log(error.message);
+  console.log(error.config);
+  setIsLoading(false)
+  if (error.response) {
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
+  }
+}
 
-    }
   };
   
   const handleOpenConfirmationModal = () => {
@@ -158,37 +185,48 @@ await api.put(`/owner/clients/${idClient}`, formData, {
     setConfirmationVisible(false);
     closeModal();
   };
-
+  
   const selectImage = async (setImage) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+    
     if (status !== "granted") {
       alert("Se requiere acceso a la galería para seleccionar una imagen.");
       return;
     }
-
+    
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-
+    
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setImage(result.assets[0].uri);
     }
   };
-
   const handleCloseModalEdit = () => {
     closeModal(); // Cierra el modal principal
     setConfirmationVisible(false); // Establece la visibilidad del modal de confirmación como falso
     // Código adicional para abrir el modal anterior
   };
-
+  
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={closeModal}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
+        <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
           <ScrollView>
             <Text style={styles.modalTitle}>Editar usuario</Text>
             <Text style={styles.modalSubtitle}>Deje vacíos los campos que no va a editar</Text>
@@ -221,10 +259,10 @@ await api.put(`/owner/clients/${idClient}`, formData, {
             <TouchableOpacity onPress={showDatepicker} style={styles.formInputFotos}>
               <Text
                 style={{
-                  color: dateSet ? "black" : "grey",
+                  color: "black" 
                 }}
               >
-                {dateSet ? date.toDateString() : dateOfBirth}
+                {dateOfBirth}
               </Text>
 
               {show && (
@@ -254,6 +292,28 @@ await api.put(`/owner/clients/${idClient}`, formData, {
               style={styles.textInput}
               value={password}
               onChangeText={setPassword}
+            />
+
+            <Text style={styles.textCamp}>Fecha de corte:</Text>
+            <TextInput
+              placeholder="Puede dejar vacio este campo"
+              style={styles.textInput}
+              value={fechaCorte.toString()}
+              onChangeText={setFechaCorte}
+            />
+            <Text style={styles.textCamp}>Fecha limite de pago:</Text>
+            <TextInput
+              placeholder="Puede dejar vacio este campo"
+              style={styles.textInput}
+              value={fechaPago.toString()}
+              onChangeText={setFechaPago}
+            />
+            <Text style={styles.textCamp}>Monto final con intereses:</Text>
+            <TextInput
+              placeholder="Puede dejar vacio este campo"
+              style={styles.textInput}
+              value={montoFinal.toString()}
+              onChangeText={setMontoFinal}
             />
 
             <Text style={styles.textCamp}>PIN:</Text>
@@ -290,7 +350,12 @@ await api.put(`/owner/clients/${idClient}`, formData, {
               <Text style={styles.confirmButtonText}>Confirmar cambios</Text>
             </TouchableOpacity>
 
-            <EditModalConfirmation visible={confirmationVisible} closeModal={handleCloseConfirmationModal} refreshData={refreshData} setRefreshData={setRefreshData}/>
+            <EditModalConfirmation
+              visible={confirmationVisible}
+              closeModal={handleCloseConfirmationModal}
+              refreshData={refreshData}
+              setRefreshData={setRefreshData}
+            />
           </ScrollView>
         </View>
       </View>

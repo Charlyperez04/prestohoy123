@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  Alert
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { ScrollView } from "react-native-gesture-handler";
@@ -15,6 +16,7 @@ import EditModalConfirmation from "./EditModalConfirmation";
 import * as Updates from "expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../api/connection";
+
 
 const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const [fullName, setFullName] = useState("");
@@ -29,6 +31,9 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const [ineBackImage, setIneBackImage] = useState(null);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [fechaCorte, setFechaCorte] = useState("");
+  const [fechaPago, setFechaPago] = useState("");
+  const [montoFinal, setMontoFinal] = useState("");
 
   const handleConfirm = async () => {
     setIsLoading(true);
@@ -46,7 +51,17 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
       formData.append("maxCredit", maxCredit);
       formData.append("bornDate", dateOfBirth);
       formData.append("usedCredit", usedCredit);
-
+      if(
+        fechaCorte && fechaPago && montoFinal
+      ){
+      formData.append("fechaCorte", fechaCorte);
+      formData.append("fechaPago", fechaPago);
+      formData.append("montoFinal", montoFinal);
+      }else{
+      formData.append("fechaCorte", 0);
+      formData.append("fechaPago", 0);
+      formData.append("montoFinal", 0);
+      }
       // Ensure that an image has been selected
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
@@ -62,7 +77,10 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
         type: `image/${fileType}`,
       });
       if (!ineFrontImage) {
-        throw new Error("Seleccione una frontal de ine");
+        Alert.alert(
+          "Error",
+          'Seleccione una foto frontal de INE'
+        );
       }
 
       const uriPartsFront = ineFrontImage.split(".");
@@ -73,7 +91,10 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
         type: `image/${fileTypeFront}`,
       });
       if (!ineBackImage) {
-        throw new Error("Seleccione una trasera de ine");
+        Alert.alert(
+          "Error",
+          'Seleccione una foto trasera de INE'
+        );
       }
       const uriPartsBack = ineBackImage.split(".");
       const fileTypeBack = uriPartsBack[uriPartsBack.length - 1];
@@ -197,6 +218,27 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
               style={styles.textInput}
               value={password}
               onChangeText={setPassword}
+            />
+            <Text style={styles.textCamp}>Fecha de corte:</Text>
+            <TextInput
+              placeholder="Puede dejar vacio este campo"
+              style={styles.textInput}
+              value={fechaCorte}
+              onChangeText={setFechaCorte}
+            />
+            <Text style={styles.textCamp}>Fecha limite de pago:</Text>
+            <TextInput
+              placeholder="Puede dejar vacio este campo"
+              style={styles.textInput}
+              value={fechaPago}
+              onChangeText={setFechaPago}
+            />
+            <Text style={styles.textCamp}>Monto final con intereses:</Text>
+            <TextInput
+              placeholder="Puede dejar vacio este campo"
+              style={styles.textInput}
+              value={montoFinal}
+              onChangeText={setMontoFinal}
             />
 
             <Text style={styles.textCamp}>PIN:</Text>

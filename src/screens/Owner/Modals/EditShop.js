@@ -1,8 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import { StackActions } from "@react-navigation/native";
-import * as Updates from 'expo-updates';
+import * as Updates from "expo-updates";
 import React, { useState, useEffect } from "react";
-import { Modal, Text, TouchableOpacity, View, TextInput, StyleSheet, Image } from "react-native";
+import {
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import EditModalConfirmation from "./EditModalConfirmation";
@@ -10,9 +19,7 @@ import api from "../../../api/connection";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData }) => {
-
-
+const EditShopModal = ({ visible, closeModal, idShop, refreshData, setRefreshData }) => {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [ownerName, setOwnerName] = useState("");
@@ -25,6 +32,7 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
   const [profileImage, setProfileImage] = useState(null);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [userToken, setUserToken] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +44,7 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
         if (token !== null) {
           setUserToken(token);
         }
-        
+
         if (token !== null) {
           // Realizar la petición GET con Axios
           let [responseShop] = await Promise.all([
@@ -44,16 +52,16 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
               headers: { Authorization: token },
             }),
           ]);
-          setFullName(responseShop.data.name)
-          setOwnerName(responseShop.data.bossName)
-          setPhoneNumber(responseShop.data.number)
-          setCardNumber(responseShop.data.cardNumber)
-          setBankName(responseShop.data.bank)
-          setFieldName(responseShop.data.giro)
-          setLinkName(responseShop.data.link)
-          setAddress(responseShop.data.address)
-          setProfileImage(responseShop.data.profilePhoto)
-          setPassword(responseShop.data.password)
+          setFullName(responseShop.data.name);
+          setOwnerName(responseShop.data.bossName);
+          setPhoneNumber(responseShop.data.number);
+          setCardNumber(responseShop.data.cardNumber);
+          setBankName(responseShop.data.bank);
+          setFieldName(responseShop.data.giro);
+          setLinkName(responseShop.data.link);
+          setAddress(responseShop.data.address);
+          setProfileImage(responseShop.data.profilePhoto);
+          setPassword(responseShop.data.password);
         }
       } catch ({ error, response }) {
         console.error(error);
@@ -63,8 +71,9 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
 
     fetchData();
   }, []);
-  
+
   const handleConfirm = async () => {
+    setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("userToken");
 
@@ -98,7 +107,7 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
       });
 
       // Make the request
-    
+
       const response = await api.put(`/owner/shops/${idShop}`, formData, {
         headers: {
           Authorization: token,
@@ -108,10 +117,11 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
 
       console.log(response);
       setConfirmationVisible(true);
-      setRefreshData(!refreshData)
-     
+      setRefreshData(!refreshData);
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
+      setIsLoading(false);
       // Here you could handle errors from the request, or the error we threw if no image was selected
     }
   };
@@ -189,7 +199,18 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
               value={cardNumber}
               onChangeText={setCardNumber}
             />
-
+            <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
             <Text style={styles.textCamp}>Banco:</Text>
             <TextInput
               placeholder="Nombre del banco"
@@ -242,7 +263,12 @@ const EditShopModal = ({ visible, closeModal, idShop,refreshData,setRefreshData 
               <Text style={styles.confirmButtonText}>Confirmar cambios</Text>
             </TouchableOpacity>
 
-            <EditModalConfirmation visible={confirmationVisible} closeModal={handleCloseConfirmationModal} refreshData={refreshData} setRefreshData={setRefreshData} />
+            <EditModalConfirmation
+              visible={confirmationVisible}
+              closeModal={handleCloseConfirmationModal}
+              refreshData={refreshData}
+              setRefreshData={setRefreshData}
+            />
           </ScrollView>
         </View>
       </View>

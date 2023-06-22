@@ -14,6 +14,7 @@ import {
   Image,
   StyleSheet,
   Platform,
+  ActivityIndicator
 } from "react-native";
 import arrow from "../../assets/arrow.png";
 import ModalSendNotification from "./Modals/SendNotification";
@@ -37,6 +38,7 @@ function ShopScreen({ navigation }) {
   const [shops, setShops] = useState(false);
   const [filteredShops, setFilteredShops] = useState(shops);
   const [refreshData, setRefreshData] = useState(false);
+  const [isLoading,setIsLoading]=useState(false)
 
   useEffect(() => {
     const filterShops = () => {
@@ -52,6 +54,7 @@ function ShopScreen({ navigation }) {
   }, [searchText, shops]);
 
   useEffect(() => {
+    setIsLoading(true)
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -78,9 +81,11 @@ function ShopScreen({ navigation }) {
 
           setShops(responseShops.data);
         }
+        setIsLoading(false)
       } catch ({ error, response }) {
         console.error(error);
         console.log(response);
+        setIsLoading(false)
       }
     };
 
@@ -236,10 +241,22 @@ function ShopScreen({ navigation }) {
           setRefreshData={setRefreshData}
         />
         <FlatList data={filteredShops} renderItem={renderItem} keyExtractor={(item) => item._id} />
-
+        <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
         {selectedClient && (
           <Modal visible={!!selectedClient} animationType="slide" onRequestClose={handleCloseModal}>
             <SafeAreaProvider>
+              <ScrollView>
               <View style={styles.modalContainer}>
                 <View style={styles.modalHeader}>
                   <Icon onPress={handleCloseModal} name="keyboard-backspace" size={40} color="#000" />
@@ -249,8 +266,8 @@ function ShopScreen({ navigation }) {
                 <Text style={styles.modalUserName}>{selectedClient.name}</Text>
 
                 <Text style={styles.sectionTitle}>Datos del negocio</Text>
-
-                <ScrollView style={styles.userDataContainer}>
+               
+                <View style={styles.userDataContainer}>
                   <View style={styles.userDataLine}>
                     <Text style={styles.userDataName}>Dueño: </Text>
                     <Text style={styles.userDataText}>{selectedClient.bossName}</Text>
@@ -287,7 +304,7 @@ function ShopScreen({ navigation }) {
                     <Text style={styles.userDataName}>Número telefónico: </Text>
                     <Text style={styles.userDataText}>{selectedClient.number}</Text>
                   </View>
-                </ScrollView>
+                </View>
 
                 <TouchableOpacity onPress={handleOpenModalEdit} style={styles.sendNotificationButton}>
                   <EditShopModal
@@ -312,6 +329,7 @@ function ShopScreen({ navigation }) {
                   onCancel={closeModalDeleteShop}
                 />
               </View>
+              </ScrollView>
             </SafeAreaProvider>
           </Modal>
         )}
@@ -474,7 +492,6 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-    maxHeight: 350,
   },
   userDataLine: {
     flexDirection: "row",

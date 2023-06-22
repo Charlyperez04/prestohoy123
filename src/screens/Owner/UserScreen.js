@@ -11,6 +11,7 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import arrow from "../../assets/arrow.png";
 import ModalSendNotification from "./Modals/SendNotification";
@@ -37,6 +38,7 @@ const UsersScreen = () => {
   const [shopRole, setShopRole] = useState(null);
   const [shopId, setShopId] = useState(null);
   const [clients, setClients] = useState([]);
+  const[isLoading,setIsLoading]=useState(false)
   const [selectedClient, setSelectedClient] = useState(null);
   const [isModalFrontIneVisible, setModalFrontIneVisible] = useState(false);
   const [isModalBackIneVisible, setModalBackIneVisible] = useState(false);
@@ -45,6 +47,7 @@ const UsersScreen = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true)
       try {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
@@ -63,7 +66,9 @@ const UsersScreen = () => {
           const responseClients = await api.get(`/owner/clients`, { headers: { Authorization: token } });
           setClients(responseClients.data);
         }
+        setIsLoading(false)
       } catch (error) {
+        setIsLoading(false)
         console.error(error);
       }
     };
@@ -183,6 +188,18 @@ const UsersScreen = () => {
             <Icon name="magnify" size={30} color="#000" />
           </TouchableOpacity>
         </View>
+        <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
         <TouchableOpacity
           onPress={handleOpenModalAddUser}
           style={{
@@ -217,8 +234,9 @@ const UsersScreen = () => {
 
         {selectedClient && (
           <Modal visible={!!selectedClient} animationType="slide" onRequestClose={handleCloseModal}>
+            <ScrollView>
             <View style={styles.modalContainer}>
-              <ScrollView>
+            
                 <View style={styles.modalHeader}>
                   <Icon onPress={handleCloseModal} name="keyboard-backspace" size={40} color="#000" />
                   <TouchableOpacity onPress={() => setModalProfilePhotoVisible(true)}>
@@ -247,20 +265,28 @@ const UsersScreen = () => {
                   </View>
                   <View style={styles.creditDataBlock}>
                     <Text style={styles.creditDataTitle}>Crédito usado:</Text>
-                    <Text style={styles.creditDataText}>{selectedClient.usedCredit}</Text>
+                    <Text style={styles.creditDataText}>${selectedClient.usedCredit}</Text>
                   </View>
                 </View>
-
-                <View style={styles.creditDataBlock2}>
+                <View style={styles.creditDataContainer}>
+                <View style={styles.creditDataBlock}>
+                  <Text style={styles.creditDataTitle}>Monto por pagar:</Text>
+                  <Text style={styles.creditDataText}>
+                 ${selectedClient.montoFinal ? selectedClient.montoFinal: '0'}
+                  </Text>
+                </View>
+                <View style={styles.creditDataBlock}>
                   <Text style={styles.creditDataTitle}>Crédito restante:</Text>
                   <Text style={styles.creditDataText}>
-                    {parseFloat((selectedClient.maxCredit - selectedClient.usedCredit).toFixed(2))}
+                   ${parseFloat((selectedClient.maxCredit - selectedClient.usedCredit).toFixed(2))}
                   </Text>
+                </View>
                 </View>
 
                 <Text style={styles.sectionTitle}>Datos del usuario</Text>
 
                 <View style={styles.userDataContainer}>
+                  <ScrollView>
                   <View style={styles.userDataLine}>
                     <Text style={styles.userDataName}>Nombre: </Text>
                     <Text style={styles.userDataText}>{selectedClient.name}</Text>
@@ -282,6 +308,18 @@ const UsersScreen = () => {
                     <Text style={styles.userDataText}>{selectedClient.pin}</Text>
                   </View>
                   <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Fecha de corte: </Text>
+                    <Text style={styles.userDataText}>
+                      {selectedClient.fechaCorte ? selectedClient.fechaCorte+' de cada mes' : "Fecha por definir"}
+                    </Text>
+                  </View>
+                  <View style={styles.userDataLine}>
+                    <Text style={styles.userDataName}>Fecha limite de pago: </Text>
+                    <Text style={styles.userDataText}>
+                      {selectedClient.fechaPago ? selectedClient.fechaPago+' de cada mes' : "Fecha por definir"}
+                    </Text>
+                  </View>
+                  <View style={styles.userDataLine}>
                     <Text style={styles.userDataName}>Contraseña: </Text>
                     <Text style={styles.userDataText}>{selectedClient.password}</Text>
                   </View>
@@ -291,6 +329,7 @@ const UsersScreen = () => {
                       <Image source={{ uri: selectedClient.frontIne }} style={styles.userDataImage} />
                     </TouchableOpacity>
                   </View>
+                  </ScrollView>
                   <ModalFrontIne
                     isModalFrontIneVisible={isModalFrontIneVisible}
                     setModalFrontIneVisible={setModalFrontIneVisible}
@@ -329,8 +368,9 @@ const UsersScreen = () => {
                   onCancel={closeModalDeleteUser}
                   idClient={selectedClient._id}
                 />
-              </ScrollView>
+            
             </View>
+            </ScrollView>
           </Modal>
         )}
       </View>
@@ -489,6 +529,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
+   
   },
   userDataLine: {
     flexDirection: "row",
@@ -534,6 +575,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "90%",
     alignSelf: "center",
+    marginBottom:15
   },
   deleteUserButtonText: {
     color: "white",

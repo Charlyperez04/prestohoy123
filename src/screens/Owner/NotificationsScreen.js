@@ -11,7 +11,7 @@ import {
   Poppins_800ExtraBold,
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Modal } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Modal,ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import api from '../../api/connection'
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -31,9 +31,11 @@ function HomeScreen() {
   const [userToken, setUserToken] = useState(null);
   const [userRole, setUserRole] = useState(null)
   const [userId, setUserId] = useState(null)
+  const [isLoading,setIsLoading]=useState(false)
   
 
   useEffect(() => {
+    setIsLoading(true)
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -66,6 +68,7 @@ function HomeScreen() {
     };
 
     fetchData();
+    setIsLoading(false)
   }, []);
 
 
@@ -144,6 +147,18 @@ function HomeScreen() {
 
   return (
     <SafeAreaProvider>
+       <Modal transparent={true} animationType={"none"} visible={isLoading}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                <ActivityIndicator size="large" color="#FF0083" />
+              </View>
+            </Modal>
       <View style={styles.creditBussines}>
         <View
           style={{

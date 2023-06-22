@@ -26,12 +26,12 @@ const AppNavigator = () => {
           `User token: ${userToken}, user role: ${userRole}, user id: ${userId}`,
         );
         // Si se encuentran los datos almacenados, se establece la ruta inicial en función del rol
-        if (userRole === 'client') {
+        if (userRole === 'client'&&userId) {
           console.log('Si existe we, es este ' + userRole);
           setInitialRoute('ClientScreens');
-        } else if (userRole==='shop'){
+        } else if (userRole==='shop' && userId){
           setInitialRoute('ShopScreens')
-        } else if (userRole==='owner'){
+        } else if (userRole==='owner' && userId){
           setInitialRoute('OwnerScreens')
         }
       }
