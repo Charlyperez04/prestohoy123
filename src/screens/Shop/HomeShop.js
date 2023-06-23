@@ -53,6 +53,20 @@ function HomeScreenShop({ navigation }) {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
+        const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
+        if (token !== null) {
+            const now = Date.now();
+            const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
+            if(now >= expiryTime){
+                // si el token ha expirado
+                await AsyncStorage.clear(); // this clears all data in async storage
+                await Updates.reloadAsync(); // this restarts the JavaScript application
+            }
+            else{
+                setUserToken(token);
+            }
+        }
+
 
         if (token !== null) {
           setUserToken(token);

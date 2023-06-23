@@ -92,8 +92,6 @@ const LoginScreen = ({ navigation, route }) => {
       });
   
       if (response.data.token) {
-        console.log("SIUUUUUU");
-        console.log(response.data);
       
         // Guardar el token y el rol en AsyncStorage
         const asyncStorageOperations = [
@@ -107,9 +105,9 @@ const LoginScreen = ({ navigation, route }) => {
         const payload = tokenParts[1];
         const decodedPayload = JSON.parse(Buffer.from(payload, 'base64').toString());
         const expiryDate = decodedPayload.exp;
-      
+        const expiryDateInMilliseconds = expiryDate * 1000;
         // Guardar la fecha de expiración en AsyncStorage
-        asyncStorageOperations.push(AsyncStorage.setItem('tokenExpiry', expiryDate.toString()));
+        asyncStorageOperations.push(AsyncStorage.setItem('tokenExpiry', expiryDateInMilliseconds.toString()));
       
         // Si el rol del usuario es 'owner', solicitar autenticación biométrica
         if (response.data.role === "owner") {  // Aquí está el cambio
