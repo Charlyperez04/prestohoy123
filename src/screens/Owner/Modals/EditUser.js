@@ -30,6 +30,9 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
   const [fechaPago,setFechaPago]=useState("")
   const [montoFinal,setMontoFinal]=useState("")
   const [usedCredit,setUsedCredit]=useState("")
+  const [profileOriginalImage, setProfileOriginalImage] = useState(null);
+  const [ineFrontOriginalImage, setIneFrontOriginalImage] = useState(null);
+  const [ineBackOriginalImage, setIneBackOriginalImage] = useState(null);
   
   
   useEffect(() => {
@@ -64,6 +67,9 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
           setFechaCorte(responseClient.data.client.fechaCorte)
           setFechaPago(responseClient.data.client.fechaPago)
           setMontoFinal(responseClient.data.client.montoFinal)
+          setProfileOriginalImage(responseClient.data.client.profilePhoto);
+          setIneFrontOriginalImage(responseClient.data.client.frontIne);
+          setIneBackOriginalImage(responseClient.data.client.backIne)
           
         }
       } catch ({ error, response }) {
@@ -102,17 +108,21 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
       formData.append("maxCredit", maxCredit);
       formData.append("bornDate", dateOfBirth);
       formData.append("usedCredit", usedCredit);
-     if(fechaCorte&&fechaPago&&montoFinal){
+     if(fechaCorte){
       formData.append("fechaCorte", fechaCorte);
-      formData.append("fechaPago", fechaPago);
-      formData.append("montoFinal", montoFinal);
      }
+     if(fechaPago){
+      formData.append("fechaPago", fechaPago);
+     }
+      if(montoFinal){
+        formData.append("montoFinal", montoFinal);
+      }
 
       // Ensure that an image has been selected
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
       }
-      
+      if(profileImage!==profileOriginalImage){
       // Add the image
       const uriParts = profileImage.split(".");
       const fileType = uriParts[uriParts.length - 1];
@@ -122,13 +132,15 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
         name: `photo.${fileType}`,
         type: `image/${fileType}`,
       });
+    }
       if (!ineFrontImage) {
         Alert.alert(
           "Error",
           'Seleccione una foto frontal de INE'
         );
       }
-      
+     
+      if(ineFrontImage!==ineFrontOriginalImage){
       const uriPartsFront = ineFrontImage.split(".");
       const fileTypeFront = uriPartsFront[uriPartsFront.length - 1];
       formData.append("frontIne", {
@@ -136,19 +148,21 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
         name: `photo.${fileTypeFront}`,
         type: `image/${fileTypeFront}`,
       });
+    }
       if (!ineBackImage) {
         Alert.alert(
           "Error",
           'Seleccione una foto trasera de INE'
         );
       }
+      if(ineBackImage!==ineBackOriginalImage){
       const uriPartsBack = ineBackImage.split(".");
       const fileTypeBack = uriPartsBack[uriPartsBack.length - 1];
       formData.append("backIne", {
         uri: ineBackImage,
         name: `photo.${fileTypeBack}`,
         type: `image/${fileTypeBack}`,
-      });
+      })};
 
       let response=await api.put(`/owner/clients/${idClient}`, formData, {
         headers: {
@@ -156,7 +170,6 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(response.data);
       setIsLoading(false)
       setConfirmationVisible(true);
       

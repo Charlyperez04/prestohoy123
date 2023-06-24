@@ -39,6 +39,9 @@ function HomeScreenClient() {
   const [client, setClient] = useState("");
   const [shops, setShops] = useState([]);
   const [refreshData, setRefreshData] = useState(false);
+  const [fechaCorte,setFechaCorte]=useState('')
+  const [fechaPago,setFechaPago]=useState('')
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +80,17 @@ function HomeScreenClient() {
           ]);
           
           setShops(responseShops.data);
-          setClient(responseClient.data.client);
+         await setClient(responseClient.data.client);
+          if(responseClient.data.client.fechaCorte.length<3){
+            setFechaCorte(responseClient.data.client.fechaCorte+' de cada mes')
+          }else{
+            setFechaCorte('Por definir')
+          }
+          if(responseClient.data.client.fechaPago.length<3){
+            setFechaPago(responseClient.data.client.fechaPago+' de cada mes')
+          }else{
+            setFechaPago('Por definir')
+          }
 
           // Actualizar el estado con los datos recibidos
         }
@@ -94,7 +107,7 @@ function HomeScreenClient() {
 
     fetchData();
   }, [refreshData]);
-  const [fontsLoaded] = useFonts({
+   useFonts({
     Poppins_100Thin,
     Poppins_200ExtraLight,
     Poppins_300Light,
@@ -192,7 +205,7 @@ function HomeScreenClient() {
                 Fecha de corte:
               </Text>
               <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>
-                {client.fechaCorte? client.fechaCorte+" de cada mes" : "Por definir"}
+                {fechaCorte}
               </Text>
             </View>
             <View>
@@ -200,7 +213,7 @@ function HomeScreenClient() {
                 Fecha limite de pago:
               </Text>
               <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>{
-                client.fechaPago? client.fechaPago+" de cada mes" : "Por definir"
+                fechaPago? fechaPago : ""
               }</Text>
             </View>
            

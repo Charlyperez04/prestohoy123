@@ -73,6 +73,7 @@ const AddShopModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
       setIsLoading(false);
       console.log(response);
       setConfirmationVisible(true);
+      setRefreshData(true)
     } catch (error) {
       console.error(error);
       setIsLoading(false);

@@ -30,6 +30,7 @@ const EditShopModal = ({ visible, closeModal, idShop, refreshData, setRefreshDat
   const [linkName, setLinkName] = useState("");
   const [fieldName, setFieldName] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+  const [profileOriginalImage,setProfileOriginalImage]=useState(null)
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [userToken, setUserToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +62,7 @@ const EditShopModal = ({ visible, closeModal, idShop, refreshData, setRefreshDat
           setLinkName(responseShop.data.link);
           setAddress(responseShop.data.address);
           setProfileImage(responseShop.data.profilePhoto);
+          setProfileOriginalImage(responseShop.data.profilePhoto);
           setPassword(responseShop.data.password);
         }
       } catch ({ error, response }) {
@@ -76,10 +78,10 @@ const EditShopModal = ({ visible, closeModal, idShop, refreshData, setRefreshDat
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("userToken");
-
+  
       // Create a FormData object
       const formData = new FormData();
-
+  
       // Add all the text data
       formData.append("name", fullName);
       formData.append("bossName", ownerName);
@@ -90,41 +92,41 @@ const EditShopModal = ({ visible, closeModal, idShop, refreshData, setRefreshDat
       formData.append("link", linkName);
       formData.append("address", address);
       formData.append("password", password);
-
+  
       // Ensure that an image has been selected
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
       }
-
+      if(profileImage!==profileOriginalImage){
       // Add the image
       const uriParts = profileImage.split(".");
       const fileType = uriParts[uriParts.length - 1];
-
       formData.append("profilePhoto", {
         uri: profileImage,
         name: `photo.${fileType}`,
         type: `image/${fileType}`,
       });
-
+    }
       // Make the request
-
       const response = await api.put(`/owner/shops/${idShop}`, formData, {
         headers: {
           Authorization: token,
           "Content-Type": "multipart/form-data",
         },
       });
-
-      console.log(response);
-      setConfirmationVisible(true);
-      setRefreshData(!refreshData);
+  
+      console.log(response.data);
       setIsLoading(false);
-    } catch (error) {
+      setConfirmationVisible(true);
+      setRefreshData(true);
+    } catch ({error,response}) {
       console.error(error);
       setIsLoading(false);
+      console.log(response.data);
       // Here you could handle errors from the request, or the error we threw if no image was selected
     }
   };
+  
 
   const handleOpenConfirmationModal = () => {
     setConfirmationVisible(true);

@@ -24,6 +24,7 @@ import api from "../../api/connection";
 import ModalFrontIne from "./Modals/FrontIne";
 import ModalBackIne from "./Modals/BackIne";
 import ModalProfilePhoto from "./Modals/ProfilePhoto";
+import EditModalConfirmation from "./Modals/EditModalConfirmation";
 
 const UsersScreen = () => {
   const [searchText, setSearchText] = useState("");
@@ -32,6 +33,7 @@ const UsersScreen = () => {
   const [modalEditUser, setModalEditUser] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [isModalAddUserVisible, setIsModalAddUserVisible] = useState(false);
   const [shops, setShops] = useState([]);
   const [shopToken, setShopToken] = useState(null);
@@ -105,6 +107,10 @@ const UsersScreen = () => {
     setModalDeleteUser(true);
   };
 
+  const handleCloseConfirmationModal = () => {
+    setConfirmationVisible(false);
+    handleCloseModalEdit();
+  };
   const closeModalDeleteUser = () => {
     setModalDeleteUser(false);
   };
@@ -135,7 +141,79 @@ const UsersScreen = () => {
       console.error("Error al eliminar el negocio:", error);
     }
   };
+  const handleDeleteCutDate = async () => {
+    setIsLoading(true);
+    try {
 
+      const token = await AsyncStorage.getItem("userToken");
+      
+      const formData = new FormData();
+      
+      
+      formData.append("fechaCorte", 'Por definir');
+     
+
+      let response=await api.put(`/owner/clients/${selectedClient._id}`, formData, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data);
+      setIsLoading(false)
+      setConfirmationVisible(true);
+      setRefreshData(true)
+      
+} catch (error) {
+  console.error(error);
+  console.log(error.message);
+  console.log(error.config);
+  setIsLoading(false)
+  if (error.response) {
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
+  }
+}
+
+  };
+
+  const handleDeletePayDate = async () => {
+    setIsLoading(true);
+    try {
+
+      const token = await AsyncStorage.getItem("userToken");
+      
+      const formData = new FormData();
+      
+      
+      formData.append("fechaPago", 'Por definir');
+     
+
+      let response=await api.put(`/owner/clients/${selectedClient._id}`, formData, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data);
+      setIsLoading(false)
+      setConfirmationVisible(true);
+      setRefreshData(true)
+      
+} catch (error) {
+  console.error(error);
+  console.log(error.message);
+  console.log(error.config);
+  setIsLoading(false)
+  if (error.response) {
+    console.log(error.response.data);
+    console.log(error.response.status);
+    console.log(error.response.headers);
+  }
+}
+
+  };
   const handleClientPress = (clientId) => {
     try {
       const client = clients.find((client) => client._id === clientId);
@@ -171,7 +249,12 @@ const UsersScreen = () => {
     <SafeAreaProvider>
       <View style={styles.container}>
         <Text style={styles.titleText}>Usuarios</Text>
-
+        <EditModalConfirmation
+              visible={confirmationVisible}
+              closeModal={handleCloseConfirmationModal}
+              refreshData={refreshData}
+              setRefreshData={setRefreshData}
+            />
         <View style={styles.searchSection}>
           <TextInput
             style={styles.input}
@@ -310,13 +393,13 @@ const UsersScreen = () => {
                   <View style={styles.userDataLine}>
                     <Text style={styles.userDataName}>Fecha de corte: </Text>
                     <Text style={styles.userDataText}>
-                      {selectedClient.fechaCorte ? selectedClient.fechaCorte+' de cada mes' : "Fecha por definir"}
+                      {selectedClient.fechaCorte.length<=3 ? selectedClient.fechaCorte+' de cada mes' : "Fecha por definir"}
                     </Text>
                   </View>
                   <View style={styles.userDataLine}>
                     <Text style={styles.userDataName}>Fecha limite de pago: </Text>
                     <Text style={styles.userDataText}>
-                      {selectedClient.fechaPago ? selectedClient.fechaPago+' de cada mes' : "Fecha por definir"}
+                      {selectedClient.fechaPago.length<=3 ? selectedClient.fechaPago+' de cada mes' : "Fecha por definir"}
                     </Text>
                   </View>
                   <View style={styles.userDataLine}>
@@ -354,6 +437,12 @@ const UsersScreen = () => {
 
                 <TouchableOpacity style={styles.deleteUserButton} onPress={openModalDeleteUser}>
                   <Text style={styles.deleteUserButtonText}>Borrar usuario</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteUserButton1} onPress={handleDeleteCutDate}>
+                  <Text style={styles.deleteUserButtonText}>Borrar fecha de corte</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteUserButton2} onPress={handleDeletePayDate}>
+                  <Text style={styles.deleteUserButtonText}>Borrar fecha de pago</Text>
                 </TouchableOpacity>
 
                 <ModalSendNotification
@@ -571,6 +660,28 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 10,
     marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "90%",
+    alignSelf: "center",
+    marginBottom:15
+  },
+  deleteUserButton1: {
+    backgroundColor: "#690000",
+    padding: 8,
+    borderRadius: 10,
+    marginTop: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "90%",
+    alignSelf: "center",
+    marginBottom:15
+  },
+  deleteUserButton2: {
+    backgroundColor: "#9C1E1E",
+    padding: 8,
+    borderRadius: 10,
+    marginTop: 1,
     justifyContent: "center",
     alignItems: "center",
     width: "90%",
