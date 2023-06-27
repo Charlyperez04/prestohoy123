@@ -1,11 +1,10 @@
 {
   "expo": {
     "name": "PrestoHoy",
-    "slug": "PrestoHoy",
+    "slug": "prestohoy",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/logo.png",
-  
     "splash": {
       "image": "./src/assets/logo.png",
       "resizeMode": "contain",
@@ -19,11 +18,17 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "foregroundImage": "./src//assets/logo.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.carlosp04.prestohoy"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ed1a88e8-3f27-4c41-91f8-a3c50058765c"
       }
-    }
-    
+    },
+    "owner": "carlosp04"
   },
   "plugins": [
     [
@@ -32,13 +37,13 @@
         "photosPermission": "The app accesses your photos to let you share them with your friends."
       },
       "expo-local-authentication",
-        {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
-        },
-        "expo-updates",
-        {
-          "username": "account-username"
-        }
+      {
+        "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
+      },
+      "expo-updates",
+      {
+        "username": "account-username"
+      }
     ]
   ]
 }

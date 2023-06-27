@@ -124,6 +124,7 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
       }
       if(profileImage!==profileOriginalImage){
       // Add the image
+      console.log(profileImage);
       const uriParts = profileImage.split(".");
       const fileType = uriParts[uriParts.length - 1];
       

@@ -97,10 +97,13 @@ const EditShopModal = ({ visible, closeModal, idShop, refreshData, setRefreshDat
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
       }
+      console.log(profileImage);
       if(profileImage!==profileOriginalImage){
+        console.log('pasaste');
       // Add the image
       const uriParts = profileImage.split(".");
       const fileType = uriParts[uriParts.length - 1];
+      
       formData.append("profilePhoto", {
         uri: profileImage,
         name: `photo.${fileType}`,

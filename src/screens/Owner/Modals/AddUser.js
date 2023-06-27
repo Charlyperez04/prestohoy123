@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import EditModalConfirmation from "./EditModalConfirmation";
@@ -34,7 +35,10 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const [fechaCorte, setFechaCorte] = useState("");
   const [fechaPago, setFechaPago] = useState("");
   const [montoFinal, setMontoFinal] = useState("");
-
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+  const [dateSet, setDateSet] = useState(false);
+  const [mode, setMode] = useState("date");
   const handleConfirm = async () => {
     setIsLoading(true);
     try {
@@ -58,9 +62,9 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
       formData.append("fechaPago", fechaPago);
       formData.append("montoFinal", montoFinal);
       }else{
-      formData.append("fechaCorte", 0);
-      formData.append("fechaPago", 0);
-      formData.append("montoFinal", 0);
+      formData.append("fechaCorte",'Por definir');
+      formData.append("fechaPago", 'Por definir');
+      formData.append("montoFinal",'Por definir');
       }
       // Ensure that an image has been selected
       if (!profileImage) {
@@ -132,7 +136,21 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const handleOpenConfirmationModal = () => {
     setConfirmationVisible(true);
   };
-
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(Platform.OS === "ios");
+    setDate(currentDate);
+    setDateSet(true);
+    
+    setDateOfBirth(currentDate.toDateString());
+  };
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+  const showDatepicker = () => {
+    showMode("date");
+  };
   const handleCloseConfirmationModal = () => {
     setConfirmationVisible(false);
     closeModal();
@@ -197,12 +215,28 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
             />
 
             <Text style={styles.textCamp}>Fecha de nacimiento:</Text>
-            <TextInput
-              placeholder="Fecha de nacimiento"
-              style={styles.textInput}
-              value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-            />
+            <TouchableOpacity onPress={showDatepicker} style={styles.formInputFotos}>
+              <Text
+                style={{
+                  color: "black" 
+                }}
+              >
+                {dateOfBirth}
+              </Text>
+
+              {show && (
+                <DateTimePicker
+                  style={styles.datePicker}
+                  testID="dateTimePicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChange}
+                />
+              )}
+            </TouchableOpacity>
+
 
             <Text style={styles.textCamp}>Dirección:</Text>
             <TextInput
