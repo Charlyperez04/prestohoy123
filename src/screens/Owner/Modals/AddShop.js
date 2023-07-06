@@ -74,8 +74,9 @@ const AddShopModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
       console.log(response);
       setConfirmationVisible(true);
       setRefreshData(true)
-    } catch (error) {
+    } catch ({error,response}) {
       console.error(error);
+      console.log(response.data);
       setIsLoading(false);
       // Here you could handle errors from the request, or the error we threw if no image was selected
     }

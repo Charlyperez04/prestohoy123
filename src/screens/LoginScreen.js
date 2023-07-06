@@ -8,7 +8,9 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Linking
+  Linking,
+  Alert,
+  Platform,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from "expo-local-authentication";
@@ -143,7 +145,12 @@ const LoginScreen = ({ navigation, route }) => {
       if (error.response) {
         console.log(error.response.data);
         setErrorMessage(error.response.data.mensaje); // Asume que el mensaje de error viene en 'message'
-        setErrorModalVisible(true);
+  
+        if (Platform.OS === 'ios') {
+          Alert.alert('Error', error.response.data.mensaje);
+        } else {
+          setErrorModalVisible(true);
+        }
       }
       console.log(error);
     }

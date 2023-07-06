@@ -14,7 +14,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.carlosp04.prestohoy",
+      "buildNumber": "1.0.0",
+      //the icon 
+      "icon": "./src/assets/logo.png"
     },
     "android": {
       "adaptiveIcon": {
