@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.carlosp04.prestohoy",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.0.111",
       //the icon 
       "icon": "./src/assets/logo.png"
     },

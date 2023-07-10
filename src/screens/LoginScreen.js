@@ -174,6 +174,7 @@ const LoginScreen = ({ navigation, route }) => {
   
   
   return (
+    
     <View style={styles.container}>
       {/* Aquí va el código existente para el resto de la pantalla... */}
       <Modal
@@ -282,7 +283,7 @@ const LoginScreen = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles.termsTotal}
           onPress={() => {
-            Linking.openURL('https://presto-hoy.s3.us-west-1.amazonaws.com/Documento.pdf?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEO3%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMSJHMEUCIQCVa2Y5%2FQni037a6sseVz3qFbW72MUqCPO7rX%2BwVeiM2gIgAnZbcvgGpa%2BUh1GsG2Ce8xtP9YMo6lu3zA7dbIP%2FrjEq5AIIVhAAGgwxNTkyOTI4ODI1OTAiDEuO1eKoYJoHWY%2B54SrBAgvN7igZ27kl955hgf2dJRn6g2RZNw46ZLxHp45%2BDX7Zk%2FsUOGURoh82C8ToZDwwem61XfCs%2Fvuve4iZKTnVWYReZKKUJdQSd1ZmnBB5X%2F6B33lzb20iGBzJFERhZX8zrxcqEfJuQQ4HQvxNmw7rl%2BgTkI1z1CPbofeU0YDzzGEiHGhkO9YX8ul2CzoGZLmCguwjAlBXA9sPj4qT9RlpV0mmkBJP%2BW%2BSIWqLQknfxwDNuULBl8zifMJD8BEzSMapKwuD6%2BddvstGrykghvQMUeSL1B7%2FscphZ%2F5tsPNGnh4Iv0xZo%2Fh3Nr%2BEUQG7%2FrVoj7GcEQ5j7hIxVv%2Bz7XL96s5j6lGE6LXSy3zzCVsS48UPV%2FQQaJg31mTooOUF5XodadtKlI2QgLx4M52kuGdtSDAUwh8g5tZSCn8nM33XErvZATD8yOmkBjqzAj71i7cC5Guq8RCqjLfTrXuYBx309fwQUlH1XwZgW2mnmdXdPjJeZvp%2FOtJu9KWmWsbkwN%2FwEDYw5pgMzyRp9GXnOjTURhHJzoYVrdGnq6srWpoH84VLewjUiuoPEZU4btL0%2B%2B65d6S4YlXUJYJi8wku636FNfyZybXR0TR3YZ5GWIByeFqJlol87GfOy7CNyYjt5Yjfj1pc7yLgV9U1KJap3X6HECo3mDOOyv4XmXNp9Uf9R2%2BTuJY9CZMP2kWw%2Bo0YH3IRukONy%2BzWDSGw65tGSkjZQVpQULEAIzl5hGLLdUd3ThwQrqRLDAbEEXOPWbhdkUEbwGmZvxQGwchYOuuubwMII6URDkOAFT8v%2BMMoWsLbiFARxE50Jz434OKYHPVkVm82TYoL9LDhXwgk0wAksKQ%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230627T050532Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIASKFUYP2PHKJDFWHH%2F20230627%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Signature=8e9a272b2c1a48d63f2db19030990cb8a4aad3caa25fae243c9c99a185329764');
+            Linking.openURL('https://presto-hoy.s3.us-west-1.amazonaws.com/Documento.pdf');
           }}
         >
           <Text style={styles.terms}>
