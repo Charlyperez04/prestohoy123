@@ -16,38 +16,50 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.carlosp04.prestohoy",
-      "buildNumber": "1.0.111",
-      //the icon 
-      "icon": "./src/assets/logo.png"
+      "buildNumber": "1.0.114",
+      "icon": "./src/assets/logo.png",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Necesitamos acceder a la camara para poder escanear los codigos QR de los clientes y hacer transacciones."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src//assets/logo.png",
+        "foregroundImage": "./src/assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.carlosp04.prestohoy"
+      "package": "com.carlosp04.prestohoy",
+      "permissions": ["android.permission.CAMERA"],
+      "config": {
+        "googlePlay": {
+          "permissions": ["com.google.android.gms.permission.CAMERA"]
+        }
+      }
     },
     "extra": {
       "eas": {
         "projectId": "ed1a88e8-3f27-4c41-91f8-a3c50058765c"
       }
     },
-    "owner": "carlosp04"
-  },
-  "plugins": [
-    [
-      "expo-image-picker",
-      {
-        "photosPermission": "The app accesses your photos to let you share them with your friends."
-      },
-      "expo-local-authentication",
-      {
-        "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
-      },
-      "expo-updates",
-      {
-        "username": "account-username"
-      }
+    "owner": "carlosp04",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
+        }
+      ],
+      [
+        "expo-updates",
+        {
+          "username": "account-username"
+        }
+      ]
     ]
-  ]
+  }
 }

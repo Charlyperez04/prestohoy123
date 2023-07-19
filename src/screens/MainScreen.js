@@ -41,12 +41,12 @@ const MainScreen = ({ navigation }) => {
           style={styles.termsTotal}
           onPress={() => {
             Linking.openURL(
-              "https://api.whatsapp.com/send?phone=525519557355&text=Hola,%20quisiera%20saber%20mas%20acerca%20de%20las%20condiciones,%20interes%20y%20datos%20del%20credito%20que%20proporciona"
+              'https://charlyperez04.github.io/politicaPrestoHoy/terms.html'
             );
           }}
         >
           <Text style={styles.terms}>
-            ¿Deseas conocer más acerca del crédito? <Text style={styles.boldLinkText}>Pregúntanos</Text>
+            Conoce nuestros <Text style={styles.boldLinkText}>Términos y Condiciones</Text>
           </Text>
         </TouchableOpacity>
       </View>

@@ -283,7 +283,7 @@ const LoginScreen = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles.termsTotal}
           onPress={() => {
-            Linking.openURL('https://presto-hoy.s3.us-west-1.amazonaws.com/Documento.pdf');
+            Linking.openURL('https://charlyperez04.github.io/politicaPrestoHoy/privacy.html');
           }}
         >
           <Text style={styles.terms}>

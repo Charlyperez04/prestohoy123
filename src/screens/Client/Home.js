@@ -26,6 +26,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ellipse184 from "../../assets/Ellipse184.png";
 import Group8777 from "../../assets/Group8777.png";
 import logout from "../../assets/logout.png";
+import Documents from "../../assets/Documents.png";
 import arrow from "../../assets/arrow.png";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import logo from "../../assets/logo.png";
@@ -39,9 +40,9 @@ function HomeScreenClient() {
   const [client, setClient] = useState("");
   const [shops, setShops] = useState([]);
   const [refreshData, setRefreshData] = useState(false);
-  const [fechaCorte,setFechaCorte]=useState('')
-  const [fechaPago,setFechaPago]=useState('')
-
+  const [fechaCorte, setFechaCorte] = useState("");
+  const [fechaPago, setFechaPago] = useState("");
+  const [isModalTermsVisible, setModalTermsVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,16 +52,15 @@ function HomeScreenClient() {
         const id = await AsyncStorage.getItem("userId");
         const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
         if (token !== null) {
-            const now = Date.now();
-            const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
-            if(now >= expiryTime){
-                // si el token ha expirado
-                await AsyncStorage.clear(); // this clears all data in async storage
-                await Updates.reloadAsync(); // this restarts the JavaScript application
-            }
-            else{
-                setUserToken(token);
-            }
+          const now = Date.now();
+          const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
+          if (now >= expiryTime) {
+            // si el token ha expirado
+            await AsyncStorage.clear(); // this clears all data in async storage
+            await Updates.reloadAsync(); // this restarts the JavaScript application
+          } else {
+            setUserToken(token);
+          }
         }
 
         if (token !== null) {
@@ -78,27 +78,30 @@ function HomeScreenClient() {
             api.get(`/client/${id}`, { headers: { Authorization: token } }),
             api.get(`/owner/shops`, { headers: { Authorization: token } }),
           ]);
-          
+
           setShops(responseShops.data);
-         await setClient(responseClient.data.client);
-          if(responseClient.data.client.fechaCorte.length<3){
-            setFechaCorte(responseClient.data.client.fechaCorte+' de cada mes')
-          }else{
-            setFechaCorte('Por definir')
+          await setClient(responseClient.data.client);
+          if (responseClient.data.client.fechaCorte.length < 3) {
+            setFechaCorte(responseClient.data.client.fechaCorte + " de cada mes");
+          } else {
+            setFechaCorte("Por definir");
           }
-          if(responseClient.data.client.fechaPago.length<3){
-            setFechaPago(responseClient.data.client.fechaPago+' de cada mes')
-          }else{
-            setFechaPago('Por definir')
+          if (responseClient.data.client.fechaPago.length < 3) {
+            setFechaPago(responseClient.data.client.fechaPago + " de cada mes");
+          } else {
+            setFechaPago("Por definir");
           }
 
           // Actualizar el estado con los datos recibidos
         }
       } catch ({ error, response }) {
-        if (response.data.status === "error" && response.data.mensaje === "No se encontró al cliente con el ID proporcionado") {
+        if (
+          response.data.status === "error" &&
+          response.data.mensaje === "No se encontró al cliente con el ID proporcionado"
+        ) {
           // Limpiar AsyncStorage y redirigir al usuario a la pantalla de inicio
-          await AsyncStorage.clear()
-          refreshData(true )
+          await AsyncStorage.clear();
+          refreshData(true);
         }
         console.error(error);
         console.log(response.data);
@@ -107,7 +110,7 @@ function HomeScreenClient() {
 
     fetchData();
   }, [refreshData]);
-   useFonts({
+  useFonts({
     Poppins_100Thin,
     Poppins_200ExtraLight,
     Poppins_300Light,
@@ -142,6 +145,62 @@ function HomeScreenClient() {
         <TouchableOpacity onPress={handleLogout}>
           <Image style={styles.menu} source={logout} />
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => setModalTermsVisible(true)}>
+          <Image style={styles.terms} source={Documents} />
+        </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isModalTermsVisible}
+          onRequestClose={() => {
+            setModalTermsVisible(!isModalTermsVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <ScrollView>
+              <View style={styles.modalView1}>
+                <Text style={styles.titleTerms}>TERMINOS Y CONDICIONES</Text>
+                <Text style={styles.modalText}>
+                  Los créditos ofrecidos a través de nuestra aplicación están sujetos a aprobación y
+                  cumplimiento de requisitos específicos que se enumerarán a continuación. Por favor, léelos
+                  atentamente antes de solicitar un crédito.
+                </Text>
+                <Text style={styles.modalText1}>Aprobación del Préstamo</Text>
+                <Text style={styles.modalText}>
+                  La aprobación de su solicitud de préstamo depende de la evaluación y verificación de su
+                  información personal y financiera. Esto incluye, pero no se limita a, su historial e
+                  ingresos. Se le notificará el resultado de su solicitud una vez que haya sido revisada.
+                </Text>
+                <Text style={styles.modalText1}>Costo Anual Total (CAT)</Text>
+                <Text style={styles.modalText}>
+                  El Costo Anual Total (CAT) para los créditos a través de nuestra aplicación es del 182.5%.
+                  Esto incluye todos los costos relacionados con el crédito. Es importante tener en cuenta que
+                  este porcentaje es una representación anual del coste del crédito.
+                </Text>
+                <Text style={styles.modalText1}>
+                  Tasa de Porcentaje Anual (APR) e Información de Fechas de pago
+                </Text>
+                <Text style={styles.modalText}>
+                  La Tasa de Porcentaje Anual (APR) en caso de no presentar retrasos en los pagos es de
+                  182.5%. Además, podrás elegir la fecha de corte que mejor te convenga y la fecha de pago
+                  será 10 días después de la fecha de corte seleccionada.
+                </Text>
+                <Text style={styles.modalText}>
+                  Por favor, asegúrese de comprender plenamente estos términos antes de aceptar el préstamo.
+                  Es importante entender todos estos términos y condiciones antes de solicitar un préstamo. Si
+                  tienes alguna pregunta o necesitas más información, por favor contáctenos.
+                </Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalTermsVisible(!isModalTermsVisible)}
+                >
+                  <Text style={styles.textStyle}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </Modal>
+
         <Text style={styles.welcomeText}>Bienvenido</Text>
         <Text style={styles.helloText}>¡Hola,</Text>
         <Text style={styles.username}>{client.name}!</Text>
@@ -174,7 +233,7 @@ function HomeScreenClient() {
         </View>
 
         <View style={styles.creditBussines}>
-        <Text
+          <Text
             style={{
               alignSelf: "center",
               marginTop: 5,
@@ -183,7 +242,7 @@ function HomeScreenClient() {
               fontFamily: "Poppins_600SemiBold",
             }}
           >
-           Tu monto por pagar es de {client.montoFinal? '$'+client.montoFinal : "$"+0}
+            Tu monto por pagar es de {client.montoFinal ? "$" + client.montoFinal : "$" + 0}
           </Text>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <View>
@@ -193,7 +252,7 @@ function HomeScreenClient() {
               <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>${client.maxCredit}</Text>
             </View>
             <View>
-              <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row",}}>
+              <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
                 Has usado:
               </Text>
               <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>${client.usedCredit}</Text>
@@ -204,19 +263,16 @@ function HomeScreenClient() {
               <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
                 Fecha de corte:
               </Text>
-              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>
-                {fechaCorte}
-              </Text>
+              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>{fechaCorte}</Text>
             </View>
             <View>
               <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
                 Fecha limite de pago:
               </Text>
-              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>{
-                fechaPago? fechaPago : ""
-              }</Text>
+              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>
+                {fechaPago ? fechaPago : ""}
+              </Text>
             </View>
-           
           </View>
           <Text
             style={{
@@ -245,10 +301,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  titleTerms: {
+    fontSize: 18,
+    fontFamily: "Poppins_700Bold",
+  },
   welcomeText: {
     fontSize: 18,
     fontFamily: "Poppins_700Bold",
     color: "white",
+  },
+  modalText: {
+    marginBottom: 10,
+    textAlign: "center",
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  modalText1: {
+    marginBottom: 10,
+    textAlign: "center",
+    fontSize: 17,
+    lineHeight: 24,
+    marginTop: 15,
+    fontFamily: "Poppins_600SemiBold",
   },
   helloText: {
     fontSize: 16,
@@ -302,6 +376,13 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+  terms: {
+    position: "absolute",
+    top: 10,
+    right: 140,
+    width: 35,
+    height: 35,
+  },
   decorationLeftCard: {
     position: "absolute",
     bottom: 0,
@@ -320,7 +401,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: "100%",
     padding: 20,
-    paddingTop:10,
+    paddingTop: 10,
     backgroundColor: "#FFF",
     borderTopLeftRadius: 20, // borde redondeado en la esquina superior izquierda
     borderTopRightRadius: 20, // borde redondeado en la esquina superior derecha
@@ -339,6 +420,21 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalView1: {
+    margin: 10,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
