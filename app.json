@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.carlosp04.prestohoy",
-      "buildNumber": "1.0.114",
+      "buildNumber": "1.0.115",
       "icon": "./src/assets/logo.png",
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceder a la camara para poder escanear los codigos QR de los clientes y hacer transacciones."
