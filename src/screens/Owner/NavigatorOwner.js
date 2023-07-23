@@ -12,7 +12,6 @@ const Tab = createBottomTabNavigator();
 
 export default function OwnerScreens() {
   return (
-    <NavigationContainer independent={true}>
       <Tab.Navigator
         initialRouteName='Home'
         screenOptions={({ route }) => ({
@@ -49,6 +48,5 @@ export default function OwnerScreens() {
         <Tab.Screen name="Tiendas" component={ShopsScreen}  options={{ headerShown: false }}/>
         <Tab.Screen name="Notificaciones" component={NotificationsScreen}  options={{ headerShown: false }}/>
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }

@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeScreenShop from './HomeShop';
-import NotificationsShop from './TransactionsShop';
+import NotificationsScreen from './Notifications';
 import TransactionsShop from './TransactionsShop';
 
 
@@ -23,6 +23,8 @@ export default function ShopScreens() {
               iconName = focused ? 'clock' : 'clock-outline';
             } else if (route.name === 'Inicio') {
               iconName = focused ? 'home' : 'home-outline';
+            }else if (route.name === 'Notificaciones') {
+              iconName = focused ? 'bell' : 'bell-outline';
             }
     
             color = focused ? '#FF0083' : '#FF0083';
@@ -42,6 +44,7 @@ export default function ShopScreens() {
       >
         <Tab.Screen name="Reloj" component={TransactionsShop}  options={{ headerShown: false }} />
         <Tab.Screen name="Inicio" component={HomeScreenShop} options={{ headerShown: false }} />
+        <Tab.Screen name="Notificaciones" component={NotificationsScreen} options={{ headerShown: false }} />
       </Tab.Navigator>
   );
 }

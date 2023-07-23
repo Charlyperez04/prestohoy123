@@ -2,7 +2,7 @@
   "expo": {
     "name": "PrestoHoy",
     "slug": "prestohoy",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./src/assets/logo.png",
     "splash": {
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.carlosp04.prestohoy",
-      "buildNumber": "1.0.115",
+      "buildNumber": "1.0.11",
       "icon": "./src/assets/logo.png",
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceder a la camara para poder escanear los codigos QR de los clientes y hacer transacciones."

@@ -320,8 +320,11 @@ function ShopScreen({ navigation }) {
                 <TouchableOpacity style={styles.deleteUserButton} onPress={openModalDeleteShop}>
                   <Text style={styles.deleteUserButtonText}>Borrar negocio</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.sendNotificationButton} onPress={openModalNotification}>
+                  <Text style={styles.sendNotificationButtonText}>Enviar notificación</Text>
+                </TouchableOpacity>
 
-                <ModalSendNotification visible={modalSendNotification} onClose={closeModalNotification} />
+                <ModalSendNotification visible={modalSendNotification} onClose={closeModalNotification} idClient={selectedClient._id} whatIs={'shop'}/>
 
                 <ModalDeleteShop
                   visible={modalDeleteShop}
@@ -515,6 +518,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   sendNotificationButton: {
+    marginTop:15,
     backgroundColor: "#FF0083",
     padding: 8,
     borderRadius: 10,

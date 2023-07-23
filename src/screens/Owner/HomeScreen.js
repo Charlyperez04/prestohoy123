@@ -15,7 +15,16 @@ import {
   Poppins_800ExtraBold,
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Modal,ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import trash from "../../assets/trash.png";
@@ -43,9 +52,12 @@ function HomeScreen({ navigation }) {
   const [clients, setClients] = useState("");
   const [reloadScreen, setReloadScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [resetCounterModal, setResetCounterModal] = useState(false);
+  const [logoutQuestion, setLogoutQuestion] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true)
+    setIsLoading(true);
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -53,16 +65,15 @@ function HomeScreen({ navigation }) {
         const id = await AsyncStorage.getItem("userId");
         const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
         if (token !== null) {
-            const now = Date.now();
-            const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
-            if(now >= expiryTime){
-                // si el token ha expirado
-                await AsyncStorage.clear(); // this clears all data in async storage
-                await Updates.reloadAsync(); // this restarts the JavaScript application
-            }
-            else{
-                setUserToken(token);
-            }
+          const now = Date.now();
+          const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
+          if (now >= expiryTime) {
+            // si el token ha expirado
+            await AsyncStorage.clear(); // this clears all data in async storage
+            await Updates.reloadAsync(); // this restarts the JavaScript application
+          } else {
+            setUserToken(token);
+          }
         }
 
         if (token !== null) {
@@ -86,10 +97,11 @@ function HomeScreen({ navigation }) {
           // Actualizar el estado con los datos recibidos
 
           setUserName(responseOwner.data.name);
-          setTransactions(responseTransactions.data)
+          setTransactions(responseTransactions.data);
           setShops(responseShops.data);
-          setClients(responseClients.data)
+          setClients(responseClients.data);
           setPendingTransactions(responseTransactions.data.filter((obj) => obj.status === "pending").length);
+          setTotalSpent(responseOwner.data.totalSpent);
 
           let totalMaxCredit = 0;
 
@@ -102,22 +114,46 @@ function HomeScreen({ navigation }) {
           setClientsLength(responseClients.data.length);
           setShopsLength(responseShops.data.length);
         }
-        setIsLoading(false)
+        setIsLoading(false);
       } catch ({ error, response }) {
         console.error(error);
         console.log(response);
-        setIsLoading(false)
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, [reloadScreen]);
 
-  const handleLogout = useCallback(async () => {
-    await AsyncStorage.clear(); // this clears all data in async storage
-    await Updates.reloadAsync(); // this restarts the JavaScript application
+  const handleLogout = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setLogoutQuestion(false)
+      navigation.replace('Main')
+      AsyncStorage.clear()
+      setIsLoading(false)
+    }, 800);
+    
+  };
+  const handleResetSpent = useCallback(async () => {
+    try {
+      const userToken = await AsyncStorage.getItem("userToken");
+      const id = await AsyncStorage.getItem("userId");
+      console.log(userToken);
+      const response =  await api.patch(
+        `/owner/resetSpent/${id}`,
+        { status: "done" },
+        { headers: { Authorization: userToken } }
+        );
+        setTotalSpent(response.data.totalSpent);
+        setResetCounterModal(false);
+        console.log(response.data);
+        setReloadScreen(true)
+    } catch ({ error, response }) {
+      console.error(error);
+      console.log(response.data);
+    }
   }, []);
-
   const handlePress = useCallback(
     async (transactionId, action, item) => {
       setSelectedTransaction(transactionId);
@@ -191,9 +227,42 @@ function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaProvider>
+      <Modal visible={logoutQuestion}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>¿Seguro que quieres cerrar sesión?</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <TouchableOpacity style={styles.buttonPink} onPress={handleLogout}>
+                <Text style={styles.textStyle}>Si</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.buttonGrey} onPress={() => setLogoutQuestion(false)}>
+                <Text style={styles.textStyle}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+       <Modal transparent={true} animationType={"none"} visible={isLoading}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: -30,
+            right: 0,
+            bottom: 0,
+            width: "125%",
+            height: "110%",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <ActivityIndicator size="large" color="#FF0083" />
+        </View>
+      </Modal>
       <View style={styles.welcome}>
         <TouchableOpacity
-          onPress={() => handleLogout({ navigation })}
+          onPress={() => setLogoutQuestion(true)}
           style={{
             position: "absolute",
             right: 21,
@@ -230,18 +299,7 @@ function HomeScreen({ navigation }) {
             paddingHorizontal: 30,
           }}
         >
-           <Modal transparent={true} animationType={"none"} visible={isLoading}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                <ActivityIndicator size="large" color="#FF0083" />
-              </View>
-            </Modal>
+       
           <View style={styles.dataBlock}>
             <Text style={styles.dataTitleBlock}>Total Otorgado</Text>
             <Text style={styles.dataTextBlock}>${totalCredit}</Text>
@@ -249,6 +307,36 @@ function HomeScreen({ navigation }) {
           <View style={styles.dataBlock}>
             <Text style={styles.dataTitleBlock}>Pendientes</Text>
             <Text style={styles.dataTextBlock}>{pendingTransactions}</Text>
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            width: "100%",
+            justifyContent: "space-around",
+            paddingHorizontal: 30,
+          }}
+        >
+          <Modal transparent={true} animationType={"slide"} visible={resetCounterModal}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>¿Seguro que quieres reiniciar el contador?</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  <TouchableOpacity style={styles.buttonPink} onPress={handleResetSpent}>
+                    <Text style={styles.textStyle}>Si</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.buttonGrey} onPress={() => setResetCounterModal(false)}>
+                    <Text style={styles.textStyle}>No</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+          <View style={styles.dataBlock}>
+            <TouchableOpacity onPress={() => setResetCounterModal(true)}>
+              <Text style={styles.dataTitleBlock}>Total gastado</Text>
+              <Text style={styles.dataTextBlock}>${totalSpent}</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -383,7 +471,7 @@ function HomeScreen({ navigation }) {
                             fontSize: 14,
                             color: "#CA2D0A",
                           }}
-                        > 
+                        >
                           {moment(item.timestamp).subtract(1, "hour").format("YYYY-MM-DD HH:mm")}
                         </Text>
                       </View>
@@ -416,6 +504,22 @@ function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  buttonPink: {
+    backgroundColor: "#554E4E",
+    padding: 10,
+    width: "40%",
+    marginRight: "10%",
+    borderRadius: 40,
+    marginBottom: 15,
+  },
+  buttonGrey: {
+    backgroundColor: "#FF0083",
+    padding: 10,
+    width: "40%",
+    marginLeft: "10%",
+    borderRadius: 40,
+    marginBottom: 15,
+  },
   statusImage: {
     position: "absolute",
     top: 0,
@@ -507,6 +611,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Poppins_600SemiBold",
     color: "#FF0083",
+    alignSelf:'center'
   },
   welcomeText: {
     fontSize: 18,
