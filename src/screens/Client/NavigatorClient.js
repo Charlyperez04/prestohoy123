@@ -12,7 +12,6 @@ const Tab = createBottomTabNavigator();
 
 export default function ClientScreens() {
   return (
-    <NavigationContainer independent={true}>
       <Tab.Navigator
       initialRouteName='Inicio'
         screenOptions={({ route }) => ({
@@ -49,6 +48,5 @@ export default function ClientScreens() {
         <Tab.Screen name="Inicio" component={HomeScreenClient} options={{ headerShown: false }} />
         <Tab.Screen name="Notificaciones" component={NotificationsScreen}  options={{ headerShown: false }}/>
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }

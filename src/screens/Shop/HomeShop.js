@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Alert } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Updates from "expo-updates";
 import {
@@ -15,7 +14,17 @@ import {
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList,Modal,ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Modal,
+  ActivityIndicator,
+  Alert
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import logout from "../../assets/logout.png";
 import arrow from "../../assets/arrow.png";
@@ -40,14 +49,15 @@ function HomeScreenShop({ navigation }) {
   const [transactionModalDenied, setTransactionModalDenied] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [transactions, setTransactions] = useState([]);
-  const[client,setClient]=useState('')
-  const [amount, setAmount] = useState('')
-  const [nip,setNip]=useState('')
-  const [transactionData,setTransactionData]=useState('')
-  const [isLoading,setIsLoading]=useState(false)
+  const [client, setClient] = useState("");
+  const [amount, setAmount] = useState("");
+  const [nip, setNip] = useState("");
+  const [transactionData, setTransactionData] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLogout, setIsLoadingLogout] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true)
+    setIsLoading(true);
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -55,18 +65,16 @@ function HomeScreenShop({ navigation }) {
         const id = await AsyncStorage.getItem("userId");
         const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
         if (token !== null) {
-            const now = Date.now();
-            const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
-            if(now >= expiryTime){
-                // si el token ha expirado
-                await AsyncStorage.clear(); // this clears all data in async storage
-                await Updates.reloadAsync(); // this restarts the JavaScript application
-            }
-            else{
-                setUserToken(token);
-            }
+          const now = Date.now();
+          const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
+          if (now >= expiryTime) {
+            // si el token ha expirado
+            await AsyncStorage.clear(); // this clears all data in async storage
+            await Updates.reloadAsync(); // this restarts the JavaScript application
+          } else {
+            setUserToken(token);
+          }
         }
-
 
         if (token !== null) {
           setUserToken(token);
@@ -94,79 +102,88 @@ function HomeScreenShop({ navigation }) {
     };
 
     fetchData();
-    setIsLoading(false)
+    setIsLoading(false);
   }, []);
 
-  async function handleLogout() {
+  const handleLogout = () => {
     
-    await AsyncStorage.clear(); // this clears all data in async storage
-    await Updates.reloadAsync(); // this restarts the JavaScript application
-  }
-  const handleBarCodeScanned = async ({ type, data }) => {
-    
-    try{
-      setScanned(true);
-      // Realizar la petición GET con Axios
-      let [responseClient] = await Promise.all([
-        api.get(`/client/${data}`, { headers: { Authorization: userToken } }), 
-        
-      ]);
-      console.log(responseClient.data.client);
-      setClient(responseClient.data.client)
-      setScannerVisible(false); 
-      await setModalNipVisible(true);
-    } 
-  catch({error,response}){
     Alert.alert(
-      "Error",
-      "El QR que intentas escanear no es valido",
+      "Cerrar sesión", 
+      "¿Seguro que quieres cerrar sesión?", 
       [
-        {text: 'OK', onPress: () => setScannerVisible(false)}
+        {text: "No", onPress: () => console.log("Cancel Pressed"), style: "cancel"},
+        {text: "Si", onPress: () => {
+          setIsLoading(true);
+          setTimeout(() => {
+            navigation.replace("Main");
+            AsyncStorage.clear();
+            setIsLoading(false);
+          }, 800);
+        }},
       ],
       { cancelable: false }
     );
-    
-    console.error(error);
-    console.log(response.data);
-  }
-  }
+  };
+
+  const handleBarCodeScanned = async ({ type, data }) => {
+    try {
+      setScanned(true);
+      // Realizar la petición GET con Axios
+      let [responseClient] = await Promise.all([
+        api.get(`/client/${data}`, { headers: { Authorization: userToken } }),
+      ]);
+      console.log(responseClient.data.client);
+      setClient(responseClient.data.client);
+      setScannerVisible(false);
+      await setModalNipVisible(true);
+    } catch ({ error, response }) {
+      Alert.alert(
+        "Error",
+        "El QR que intentas escanear no es valido",
+        [{ text: "OK", onPress: () => setScannerVisible(false) }],
+        { cancelable: false }
+      );
+
+      console.error(error);
+      console.log(response.data);
+    }
+  };
   const handleNipInput = (nip) => {
-    setNip(nip)
-    if(client.pin===nip){
+    setNip(nip);
+    if (client.pin === nip) {
       setModalNipVisible(false);
       setTransactionDataVisible(true);
-    }else{
+    } else {
       Alert.alert(
         "Error",
         "El NIP no es valido",
-        [
-          {text: 'OK', onPress: () => setModalNipVisible(false)}
-        ],
+        [{ text: "OK", onPress: () => setModalNipVisible(false) }],
         { cancelable: false }
       );
-      
     }
     // Aquí puedes manejar la validación del NIP y las acciones siguientes
   };
-  const handleTransaction =async (amount) => {
-    let concepto='transaccion'
-    try{
+  const handleTransaction = async (amount) => {
+    let concepto = "transaccion";
+    try {
       let [responseTransaction] = await Promise.all([
-        api.post(`/shop/transactions`, { amount: amount, clientId:client._id,shopId:userId,pin:nip,concept:concepto}, { headers: { Authorization: userToken } }),
+        api.post(
+          `/shop/transactions`,
+          { amount: amount, clientId: client._id, shopId: userId, pin: nip, concept: concepto },
+          { headers: { Authorization: userToken } }
+        ),
       ]);
-      setTransactionDataVisible(false)
+      setTransactionDataVisible(false);
       console.log(responseTransaction.data);
-      setTransactionData(responseTransaction.data.transaction)
-      setTransactionModalFinished(true)
-      
-      
-    }catch({e,response}){
-     setTransactionModalDenied(true)
+      setTransactionData(responseTransaction.data.transaction);
+      setTransactionModalFinished(true);
+    } catch ({ e, response }) {
+      setTransactionModalDenied(true);
       console.error(e);
       console.log(response.data);
     }
   };
-  
+
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -194,33 +211,40 @@ function HomeScreenShop({ navigation }) {
         <TouchableOpacity onPress={handleLogout}>
           <Image style={styles.menu} source={logout} />
         </TouchableOpacity>
-        <NipModal modalNipVisible={modalNipVisible}
-        setModalNipVisible={setModalNipVisible}
-        onNipInput={handleNipInput}/>
-        <TransactionFinished
-        transactionModalFinished={transactionModalFinished}
-        setTransactionModalFinished={setTransactionModalFinished}
-        clientName={transactionData.clientName}
-        storeName={transactionData.shopName}
-        amount={transactionData.amount}
-
+        <NipModal
+          modalNipVisible={modalNipVisible}
+          setModalNipVisible={setModalNipVisible}
+          onNipInput={handleNipInput}
         />
-         <Modal transparent={true} animationType={"none"} visible={isLoading}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                <ActivityIndicator size="large" color="#FF0083" />
-              </View>
-            </Modal>
-        <TransactionData clientName={client.name} maxCredit={client.maxCredit} usedCredit={client.usedCredit} transactionDataVisible={transactionDataVisible}
-        setTransactionDataVisible={setTransactionDataVisible} amount={amount}
-        setAmount={setAmount}
-        handleTransaction={handleTransaction}/>
+        <TransactionFinished
+          transactionModalFinished={transactionModalFinished}
+          setTransactionModalFinished={setTransactionModalFinished}
+          clientName={transactionData.clientName}
+          storeName={transactionData.shopName}
+          amount={transactionData.amount}
+        />
+        <Modal transparent={true} animationType={"none"} visible={isLoading}>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <ActivityIndicator size="large" color="#FF0083" />
+          </View>
+        </Modal>
+        <TransactionData
+          clientName={client.name}
+          maxCredit={client.maxCredit}
+          usedCredit={client.usedCredit}
+          transactionDataVisible={transactionDataVisible}
+          setTransactionDataVisible={setTransactionDataVisible}
+          amount={amount}
+          setAmount={setAmount}
+          handleTransaction={handleTransaction}
+        />
         <Text style={styles.welcomeText}>Bienvenido</Text>
         <Text style={styles.helloText}>¡Hola,</Text>
         <Text style={styles.username}>{shop.name}!</Text>
@@ -300,8 +324,25 @@ function HomeScreenShop({ navigation }) {
               </Text>
             </TouchableOpacity>
           </View>
+          <Modal transparent={true} animationType={"none"} visible={isLoadingLogout}>
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: -30,
+                right: 0,
+                bottom: 0,
+                width: "125%",
+                height: "110%",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+              }}
+            >
+              <ActivityIndicator size="large" color="#FF0083" />
+            </View>
+          </Modal>
           <View style={{ marginBottom: 25 }}>
-           
             <DenyTransaction
               transactionModalDenied={transactionModalDenied}
               setTransactionModalDenied={setTransactionModalDenied}

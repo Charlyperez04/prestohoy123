@@ -9,6 +9,8 @@ import LoginScreen from '../screens/LoginScreen';
 import OwnerScreens from '../screens/Owner/NavigatorOwner';
 import ClientScreens from '../screens/Client/NavigatorClient';
 import ShopScreens from '../screens/Shop/NavigationShop';
+import ClientHome from '../screens/Client/Home';
+import ShopHome from '../screens/Shop/HomeShop'
 
 const Stack = createStackNavigator();
 const AppNavigator = () => {
@@ -27,7 +29,6 @@ const AppNavigator = () => {
         );
         // Si se encuentran los datos almacenados, se establece la ruta inicial en función del rol
         if (userRole === 'client'&&userId) {
-          console.log('Si existe we, es este ' + userRole);
           setInitialRoute('ClientScreens');
         } else if (userRole==='shop' && userId){
           setInitialRoute('ShopScreens')
@@ -47,13 +48,15 @@ const AppNavigator = () => {
   }
 
   return (
-    <NavigationContainer independent={true}>
+    <NavigationContainer>
       <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen name="Main" component={MainScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="OwnerScreens" component={OwnerScreens} options={{ headerShown: false }} />
         <Stack.Screen name="ClientScreens" component={ClientScreens} options={{ headerShown: false }} />
+        <Stack.Screen name="ClientHomeScreen" component={ClientHome} options={{ headerShown: false }} />
+        <Stack.Screen name="ShopHomeScreen" component={ShopHome} options={{ headerShown: false }} />
         <Stack.Screen name="ShopScreens" component={ShopScreens} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>

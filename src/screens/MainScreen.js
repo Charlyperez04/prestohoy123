@@ -1,19 +1,12 @@
 import React, { useState } from "react";
-import { Modal, Text, TextInput, View, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { Modal, Text, View, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 
 const MainScreen = ({ navigation }) => {
   const [isModalTermsVisible, setModalTermsVisible] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
-
-  const handleLogin = async () => {
-    // Aquí iría tu lógica para manejar el inicio de sesión
-    // dependiendo del rol establecido (comprador, vendedor o dueño)
-  };
 
   return (
     <View style={styles.container}>
+    <ScrollView>
       <View style={styles.imageContainer}>
         <Image source={require("../assets/logo.png")} style={styles.image} />
       </View>
@@ -99,6 +92,7 @@ const MainScreen = ({ navigation }) => {
         </Modal>
 
       </View>
+      </ScrollView>
     </View>
   );
 };
@@ -176,7 +170,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     padding: 20,
-    marginBottom: 100,
+    marginBottom: 10,
   },
   image: {
     width: 360,
@@ -232,7 +226,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: "transparent",
   },
-  termsTotal: {},
   boldLinkText: {
     color: "#4A3F3F",
     textDecorationLine: "underline",

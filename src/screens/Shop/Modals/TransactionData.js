@@ -45,10 +45,7 @@ const TransactionData = ({
             Nombre: {clientName}
           </Text>
           <Text style={styles.text}>
-            Crédito Máximo: {maxCredit}
-          </Text>
-          <Text style={styles.text}>
-            Crédito Usado: {usedCredit}
+            Crédito Disponible: ${maxCredit - usedCredit}
           </Text>
           <Text style={styles.text}>
             Monto a cobrar:

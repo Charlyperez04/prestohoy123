@@ -13,7 +13,6 @@ const Tab = createBottomTabNavigator();
 
 export default function ShopScreens() {
   return (
-    <NavigationContainer independent={true}>
       <Tab.Navigator
         initialRouteName="Inicio"
         screenOptions={({ route }) => ({
@@ -44,6 +43,5 @@ export default function ShopScreens() {
         <Tab.Screen name="Reloj" component={TransactionsShop}  options={{ headerShown: false }} />
         <Tab.Screen name="Inicio" component={HomeScreenShop} options={{ headerShown: false }} />
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }

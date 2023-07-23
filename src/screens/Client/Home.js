@@ -14,24 +14,30 @@ import {
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
 import * as Linking from "expo-linking";
-import { View, Text, Image, ScrollView, Button, TouchableOpacity, StyleSheet, FlatList } from "react-native";
-import Constants from "expo-constants";
-import { useNavigation } from "@react-navigation/native";
-import Modal from "react-native-modal";
-import { NavigationContainer } from "@react-navigation/native";
-import BusinessesScreen from "./ShopList";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import NotificationsScreen from "./Notifications";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Button,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Modal,
+  Alert
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ellipse184 from "../../assets/Ellipse184.png";
 import Group8777 from "../../assets/Group8777.png";
 import logout from "../../assets/logout.png";
 import Documents from "../../assets/Documents.png";
 import arrow from "../../assets/arrow.png";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import logo from "../../assets/logo.png";
 import api from "../../api/connection";
 import * as Updates from "expo-updates";
+import { useNavigation } from "@react-navigation/native";
+import { log } from "react-native-reanimated";
 
 function HomeScreenClient() {
   const [userToken, setUserToken] = useState(null);
@@ -43,6 +49,8 @@ function HomeScreenClient() {
   const [fechaCorte, setFechaCorte] = useState("");
   const [fechaPago, setFechaPago] = useState("");
   const [isModalTermsVisible, setModalTermsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [logoutQuestion, setLogoutQuestion] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,12 +130,19 @@ function HomeScreenClient() {
     Poppins_900Black,
   });
   const [isModalVisible, setModalVisible] = useState(false);
+
   const navigation = useNavigation();
-  async function handleLogout() {
-    await AsyncStorage.clear(); // this clears all data in async storage
-    await Updates.reloadAsync(); // this restarts the JavaScript application
-    setRefreshData(!refreshData);
-  }
+
+  const handleLogout = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setLogoutQuestion(false)
+      navigation.replace('Main')
+      AsyncStorage.clear()
+      setIsLoading(false)
+    }, 800);
+    
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => Linking.openURL(item.link)}>
@@ -141,21 +156,47 @@ function HomeScreenClient() {
 
   return (
     <SafeAreaProvider>
+      <Modal visible={logoutQuestion}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>¿Seguro que quieres cerrar sesión?</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <TouchableOpacity style={styles.buttonPink} onPress={handleLogout}>
+                <Text style={styles.textStyle}>Si</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.buttonGrey} onPress={() => setLogoutQuestion(false)}>
+                <Text style={styles.textStyle}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal transparent={true} animationType={"none"} visible={isLoading}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: -30,
+            right: 0,
+            bottom: 0,
+            width: "125%",
+            height: "110%",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <ActivityIndicator size="large" color="#FF0083" />
+        </View>
+      </Modal>
       <View style={styles.welcome}>
-        <TouchableOpacity onPress={handleLogout}>
+        <TouchableOpacity onPress={()=>setLogoutQuestion(true)}>
           <Image style={styles.menu} source={logout} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setModalTermsVisible(true)}>
           <Image style={styles.terms} source={Documents} />
         </TouchableOpacity>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isModalTermsVisible}
-          onRequestClose={() => {
-            setModalTermsVisible(!isModalTermsVisible);
-          }}
-        >
+        <Modal animationType="slide" transparent={true} visible={isModalTermsVisible}>
           <View style={styles.centeredView}>
             <ScrollView>
               <View style={styles.modalView1}>
@@ -200,7 +241,6 @@ function HomeScreenClient() {
             </ScrollView>
           </View>
         </Modal>
-
         <Text style={styles.welcomeText}>Bienvenido</Text>
         <Text style={styles.helloText}>¡Hola,</Text>
         <Text style={styles.username}>{client.name}!</Text>
@@ -211,14 +251,7 @@ function HomeScreenClient() {
             <Image source={{ uri: client.qrCode }} style={styles.qrCode} />
           </TouchableOpacity>
 
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => {
-              setModalVisible(!isModalVisible);
-            }}
-          >
+          <Modal animationType="slide" transparent={true} visible={isModalVisible}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
                 <Image style={styles.modalImage} source={{ uri: client.qrCode }} />
@@ -247,6 +280,24 @@ function HomeScreenClient() {
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <View>
               <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
+                Tu monto por pagar es de:
+              </Text>
+              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>
+                {client.montoFinal ? "$" + client.montoFinal : "$" + 0}
+              </Text>
+            </View>
+            <View>
+              <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
+                Crédito restante:
+              </Text>
+              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold", textAlign: "right" }}>
+                ${client.maxCredit - client.usedCredit}
+              </Text>
+            </View>
+          </View>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View>
+              <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
                 Tu crédito es de:
               </Text>
               <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>${client.maxCredit}</Text>
@@ -255,7 +306,9 @@ function HomeScreenClient() {
               <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
                 Has usado:
               </Text>
-              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>${client.usedCredit}</Text>
+              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold", textAlign: "right" }}>
+                ${client.usedCredit}
+              </Text>
             </View>
           </View>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -269,7 +322,7 @@ function HomeScreenClient() {
               <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", flexDirection: "row" }}>
                 Fecha limite de pago:
               </Text>
-              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold" }}>
+              <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold", textAlign: "right" }}>
                 {fechaPago ? fechaPago : ""}
               </Text>
             </View>
@@ -285,8 +338,6 @@ function HomeScreenClient() {
             ¿Dónde quieres usar tu crédito?
           </Text>
           <FlatList data={shops} renderItem={renderItem} keyExtractor={(item) => item._id} />
-
-          {/* Repite el View anterior para cada negocio */}
         </View>
       </View>
     </SafeAreaProvider>
@@ -294,6 +345,22 @@ function HomeScreenClient() {
 }
 
 const styles = StyleSheet.create({
+  buttonPink: {
+    backgroundColor: "#554E4E",
+    padding: 10,
+    width: "40%",
+    marginRight:'10%',
+    borderRadius: 40,
+    marginBottom: 15,
+  },
+  buttonGrey: {
+    backgroundColor: "#FF0083",
+    padding: 10,
+    width: "40%",
+    marginLeft:'10%',
+    borderRadius: 40,
+    marginBottom: 15,
+  },
   welcome: {
     paddingTop: 60,
     flex: 1,

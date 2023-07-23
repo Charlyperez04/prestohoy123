@@ -22,6 +22,7 @@ const NipModal = ({ modalNipVisible, setModalNipVisible, onNipInput}) => {
   const handleButtonPress = () => {
     onNipInput(nip);
     setModalNipVisible(!modalNipVisible);
+    setNip('')
   };
   return (
     <Modal
@@ -41,12 +42,13 @@ const NipModal = ({ modalNipVisible, setModalNipVisible, onNipInput}) => {
             keyboardType='numeric' // solo permitirá la entrada de números
             onChangeText={text => setNip(text)}
             value={nip}
+            secureTextEntry={true}
           />
           <TouchableOpacity
             style={styles.closeButton}
             onPress={handleButtonPress} // cierra el modal cuando se presiona
           >
-            <Text style={styles.textCloseButton}> Listo</Text>
+            <Text style={styles.textCloseButton}>Listo</Text>
           </TouchableOpacity>
         </View>
       </View>
