@@ -22,8 +22,9 @@ import {
   StyleSheet,
   FlatList,
   Modal,
+  TouchableWithoutFeedback,
   ActivityIndicator,
-  Alert
+  Alert,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import logout from "../../assets/logout.png";
@@ -63,6 +64,7 @@ function HomeScreenShop({ navigation }) {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
+        const tokenPush = await AsyncStorage.getItem("userTokenPush");
         const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
         if (token !== null) {
           const now = Date.now();
@@ -87,12 +89,17 @@ function HomeScreenShop({ navigation }) {
         }
         if (token !== null && id !== null) {
           // Realizar la petición GET con Axios
-          let [responseShop, responseTransactions] = await Promise.all([
+          let [responseShop, responseTransactions, responsePush] = await Promise.all([
             api.get(`/shop/${id}`, { headers: { Authorization: token } }),
             api.get(`/shop/transactions/${id}`, { headers: { Authorization: token } }),
+            api.patch(
+              `/shop/tokenNotifications/${id}`,
+              { token: tokenPush },
+              { headers: { Authorization: token } }
+            ),
           ]);
+          console.log(responsePush.data);
           setShop(responseShop.data);
-          console.log(responseTransactions.data);
           setTransactions(responseTransactions.data.transactions);
           // Actualizar el estado con los datos recibidos
         }
@@ -106,20 +113,36 @@ function HomeScreenShop({ navigation }) {
   }, []);
 
   const handleLogout = () => {
-    
     Alert.alert(
-      "Cerrar sesión", 
-      "¿Seguro que quieres cerrar sesión?", 
+      "Cerrar sesión",
+      "¿Seguro que quieres cerrar sesión?",
       [
-        {text: "No", onPress: () => console.log("Cancel Pressed"), style: "cancel"},
-        {text: "Si", onPress: () => {
-          setIsLoading(true);
-          setTimeout(() => {
-            navigation.replace("Main");
-            AsyncStorage.clear();
-            setIsLoading(false);
-          }, 800);
-        }},
+        { text: "No", onPress: () => console.log("Cancel Pressed"), style: "cancel" },
+        {
+          text: "Si",
+          onPress: async () => {
+            setIsLoading(true);
+            try {
+              const token = await AsyncStorage.getItem("userToken");
+              const id = await AsyncStorage.getItem("userId");
+              let [responsePush] = await Promise.all([
+                api.patch(
+                  `/shop/tokenNotifications/${id}`,
+                  { token: "" },
+                  { headers: { Authorization: token } }
+                ),
+              ]);
+              console.log(responsePush.data);
+            } catch ({ error }) {
+              console.error(error);
+            }
+            setTimeout(() => {
+              navigation.replace("Main");
+              AsyncStorage.clear();
+              setIsLoading(false);
+            }, 800);
+          },
+        },
       ],
       { cancelable: false }
     );
@@ -208,9 +231,15 @@ function HomeScreenShop({ navigation }) {
   return (
     <SafeAreaProvider>
       <View style={styles.welcome}>
-        <TouchableOpacity onPress={handleLogout}>
+        <View onPress={handleLogout}>
+        <TouchableWithoutFeedback 
+          onPress={async () => {
+           await navigation.replace("Main");
+            AsyncStorage.clear();
+          }}>
           <Image style={styles.menu} source={logout} />
-        </TouchableOpacity>
+          </TouchableWithoutFeedback>
+        </View>
         <NipModal
           modalNipVisible={modalNipVisible}
           setModalNipVisible={setModalNipVisible}
@@ -374,7 +403,7 @@ function HomeScreenShop({ navigation }) {
 
 const styles = StyleSheet.create({
   welcome: {
-    paddingTop: 60,
+    paddingTop: 20,
     flex: 1,
     backgroundColor: "#FF0083",
     alignItems: "center",

@@ -40,16 +40,16 @@ const UsersScreen = () => {
   const [shopRole, setShopRole] = useState(null);
   const [shopId, setShopId] = useState(null);
   const [clients, setClients] = useState([]);
-  const[isLoading,setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [isModalFrontIneVisible, setModalFrontIneVisible] = useState(false);
   const [isModalBackIneVisible, setModalBackIneVisible] = useState(false);
   const [isModalProfilePhotoVisible, setModalProfilePhotoVisible] = useState(false);
-  const [refreshData,setRefreshData]=useState(false)
+  const [refreshData, setRefreshData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
@@ -68,9 +68,9 @@ const UsersScreen = () => {
           const responseClients = await api.get(`/owner/clients`, { headers: { Authorization: token } });
           setClients(responseClients.data);
         }
-        setIsLoading(false)
+        setIsLoading(false);
       } catch (error) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.error(error);
       }
     };
@@ -144,75 +144,65 @@ const UsersScreen = () => {
   const handleDeleteCutDate = async () => {
     setIsLoading(true);
     try {
-
       const token = await AsyncStorage.getItem("userToken");
-      
-      const formData = new FormData();
-      
-      
-      formData.append("fechaCorte", 'Por definir');
-     
 
-      let response=await api.put(`/owner/clients/${selectedClient._id}`, formData, {
+      const formData = new FormData();
+
+      formData.append("fechaCorte", "Por definir");
+
+      let response = await api.put(`/owner/clients/${selectedClient._id}`, formData, {
         headers: {
           Authorization: token,
           "Content-Type": "multipart/form-data",
         },
       });
       console.log(response.data);
-      setIsLoading(false)
+      setIsLoading(false);
       setConfirmationVisible(true);
-      setRefreshData(true)
-      
-} catch (error) {
-  console.error(error);
-  console.log(error.message);
-  console.log(error.config);
-  setIsLoading(false)
-  if (error.response) {
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
-  }
-}
-
+      setRefreshData(true);
+    } catch (error) {
+      console.error(error);
+      console.log(error.message);
+      console.log(error.config);
+      setIsLoading(false);
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
+    }
   };
 
   const handleDeletePayDate = async () => {
     setIsLoading(true);
     try {
-
       const token = await AsyncStorage.getItem("userToken");
-      
-      const formData = new FormData();
-      
-      
-      formData.append("fechaPago", 'Por definir');
-     
 
-      let response=await api.put(`/owner/clients/${selectedClient._id}`, formData, {
+      const formData = new FormData();
+
+      formData.append("fechaPago", "Por definir");
+
+      let response = await api.put(`/owner/clients/${selectedClient._id}`, formData, {
         headers: {
           Authorization: token,
           "Content-Type": "multipart/form-data",
         },
       });
       console.log(response.data);
-      setIsLoading(false)
+      setIsLoading(false);
       setConfirmationVisible(true);
-      setRefreshData(true)
-      
-} catch (error) {
-  console.error(error);
-  console.log(error.message);
-  console.log(error.config);
-  setIsLoading(false)
-  if (error.response) {
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
-  }
-}
-
+      setRefreshData(true);
+    } catch (error) {
+      console.error(error);
+      console.log(error.message);
+      console.log(error.config);
+      setIsLoading(false);
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
+    }
   };
   const handleClientPress = (clientId) => {
     try {
@@ -250,11 +240,11 @@ const UsersScreen = () => {
       <View style={styles.container}>
         <Text style={styles.titleText}>Usuarios</Text>
         <EditModalConfirmation
-              visible={confirmationVisible}
-              closeModal={handleCloseConfirmationModal}
-              refreshData={refreshData}
-              setRefreshData={setRefreshData}
-            />
+          visible={confirmationVisible}
+          closeModal={handleCloseConfirmationModal}
+          refreshData={refreshData}
+          setRefreshData={setRefreshData}
+        />
         <View style={styles.searchSection}>
           <TextInput
             style={styles.input}
@@ -272,17 +262,17 @@ const UsersScreen = () => {
           </TouchableOpacity>
         </View>
         <Modal transparent={true} animationType={"none"} visible={isLoading}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                <ActivityIndicator size="large" color="#FF0083" />
-              </View>
-            </Modal>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            <ActivityIndicator size="large" color="#FF0083" />
+          </View>
+        </Modal>
         <TouchableOpacity
           onPress={handleOpenModalAddUser}
           style={{
@@ -312,14 +302,18 @@ const UsersScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        <AddUserModal visible={isModalAddUserVisible} closeModal={handleCloseModalAddUser} refreshData={refreshData} setRefreshData={setRefreshData} />
+        <AddUserModal
+          visible={isModalAddUserVisible}
+          closeModal={handleCloseModalAddUser}
+          refreshData={refreshData}
+          setRefreshData={setRefreshData}
+        />
         <FlatList data={filteredClients} renderItem={renderItem} keyExtractor={(item) => item._id} />
 
         {selectedClient && (
           <Modal visible={!!selectedClient} animationType="slide" onRequestClose={handleCloseModal}>
             <ScrollView>
-            <View style={styles.modalContainer}>
-            
+              <View style={styles.modalContainer}>
                 <View style={styles.modalHeader}>
                   <Icon onPress={handleCloseModal} name="keyboard-backspace" size={40} color="#000" />
                   <TouchableOpacity onPress={() => setModalProfilePhotoVisible(true)}>
@@ -352,66 +346,70 @@ const UsersScreen = () => {
                   </View>
                 </View>
                 <View style={styles.creditDataContainer}>
-                <View style={styles.creditDataBlock}>
-                  <Text style={styles.creditDataTitle}>Monto por pagar:</Text>
-                  <Text style={styles.creditDataText}>
-                 ${selectedClient.montoFinal ? selectedClient.montoFinal: '0'}
-                  </Text>
-                </View>
-                <View style={styles.creditDataBlock}>
-                  <Text style={styles.creditDataTitle}>Crédito restante:</Text>
-                  <Text style={styles.creditDataText}>
-                   ${parseFloat((selectedClient.maxCredit - selectedClient.usedCredit).toFixed(2))}
-                  </Text>
-                </View>
+                  <View style={styles.creditDataBlock}>
+                    <Text style={styles.creditDataTitle}>Monto por pagar:</Text>
+                    <Text style={styles.creditDataText}>
+                      ${selectedClient.montoFinal ? selectedClient.montoFinal : "0"}
+                    </Text>
+                  </View>
+                  <View style={styles.creditDataBlock}>
+                    <Text style={styles.creditDataTitle}>Crédito restante:</Text>
+                    <Text style={styles.creditDataText}>
+                      ${parseFloat((selectedClient.maxCredit - selectedClient.usedCredit).toFixed(2))}
+                    </Text>
+                  </View>
                 </View>
 
                 <Text style={styles.sectionTitle}>Datos del usuario</Text>
 
                 <View style={styles.userDataContainer}>
                   <ScrollView>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Nombre: </Text>
-                    <Text style={styles.userDataText}>{selectedClient.name}</Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Dirección: </Text>
-                    <Text style={styles.userDataText}>{selectedClient.address}</Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Fecha de nacimiento: </Text>
-                    <Text style={styles.userDataText}>{selectedClient.bornDate}</Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Número: </Text>
-                    <Text style={styles.userDataText}>{selectedClient.phoneNumber}</Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>PIN: </Text>
-                    <Text style={styles.userDataText}>{selectedClient.pin}</Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Fecha de corte: </Text>
-                    <Text style={styles.userDataText}>
-                      {selectedClient.fechaCorte.length<=3 ? selectedClient.fechaCorte+' de cada mes' : "Fecha por definir"}
-                    </Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Fecha limite de pago: </Text>
-                    <Text style={styles.userDataText}>
-                      {selectedClient.fechaPago.length<=3 ? selectedClient.fechaPago+' de cada mes' : "Fecha por definir"}
-                    </Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Contraseña: </Text>
-                    <Text style={styles.userDataText}>{selectedClient.password}</Text>
-                  </View>
-                  <View style={styles.userDataLine}>
-                    <Text style={styles.userDataName}>Imagen INE frontal: </Text>
-                    <TouchableOpacity onPress={() => setModalFrontIneVisible(true)}>
-                      <Image source={{ uri: selectedClient.frontIne }} style={styles.userDataImage} />
-                    </TouchableOpacity>
-                  </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Nombre: </Text>
+                      <Text style={styles.userDataText}>{selectedClient.name}</Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Dirección: </Text>
+                      <Text style={styles.userDataText}>{selectedClient.address}</Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Fecha de nacimiento: </Text>
+                      <Text style={styles.userDataText}>{selectedClient.bornDate}</Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Número: </Text>
+                      <Text style={styles.userDataText}>{selectedClient.phoneNumber}</Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>PIN: </Text>
+                      <Text style={styles.userDataText}>{selectedClient.pin}</Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Fecha de corte: </Text>
+                      <Text style={styles.userDataText}>
+                        {selectedClient.fechaCorte.length <= 3
+                          ? selectedClient.fechaCorte + " de cada mes"
+                          : "Fecha por definir"}
+                      </Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Fecha limite de pago: </Text>
+                      <Text style={styles.userDataText}>
+                        {selectedClient.fechaPago.length <= 3
+                          ? selectedClient.fechaPago + " de cada mes"
+                          : "Fecha por definir"}
+                      </Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Contraseña: </Text>
+                      <Text style={styles.userDataText}>{selectedClient.password}</Text>
+                    </View>
+                    <View style={styles.userDataLine}>
+                      <Text style={styles.userDataName}>Imagen INE frontal: </Text>
+                      <TouchableOpacity onPress={() => setModalFrontIneVisible(true)}>
+                        <Image source={{ uri: selectedClient.frontIne }} style={styles.userDataImage} />
+                      </TouchableOpacity>
+                    </View>
                   </ScrollView>
                   <ModalFrontIne
                     isModalFrontIneVisible={isModalFrontIneVisible}
@@ -449,6 +447,7 @@ const UsersScreen = () => {
                   visible={modalSendNotification}
                   onClose={closeModalNotification}
                   idClient={selectedClient._id}
+                  tokenPush={selectedClient.tokenNotifications}
                 />
 
                 <ModalDeleteUser
@@ -457,8 +456,7 @@ const UsersScreen = () => {
                   onCancel={closeModalDeleteUser}
                   idClient={selectedClient._id}
                 />
-            
-            </View>
+              </View>
             </ScrollView>
           </Modal>
         )}
@@ -517,15 +515,16 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     ...Platform.select({
-      ios:{
-      flex: 1,
-      backgroundColor: "white",
-      marginTop:50
-      },android:{
+      ios: {
+        flex: 1,
+        backgroundColor: "white",
+        marginTop: 50,
+      },
+      android: {
         lex: 1,
-      backgroundColor: "white",
-      marginTop:20
-      }
+        backgroundColor: "white",
+        marginTop: 20,
+      },
     }),
   },
   modalHeader: {
@@ -618,7 +617,6 @@ const styles = StyleSheet.create({
       width: 0,
       height: 4,
     },
-   
   },
   userDataLine: {
     flexDirection: "row",
@@ -664,7 +662,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "90%",
     alignSelf: "center",
-    marginBottom:15
+    marginBottom: 15,
   },
   deleteUserButton1: {
     backgroundColor: "#690000",
@@ -675,7 +673,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "90%",
     alignSelf: "center",
-    marginBottom:15
+    marginBottom: 15,
   },
   deleteUserButton2: {
     backgroundColor: "#9C1E1E",
@@ -686,7 +684,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "90%",
     alignSelf: "center",
-    marginBottom:15
+    marginBottom: 15,
   },
   deleteUserButtonText: {
     color: "white",

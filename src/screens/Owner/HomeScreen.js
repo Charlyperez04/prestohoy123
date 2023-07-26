@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   },
 
   welcome: {
-    paddingTop: 60,
+    paddingTop: 20,
     flex: 1,
     backgroundColor: "#FF0083",
     alignItems: "center",

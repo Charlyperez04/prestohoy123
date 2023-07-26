@@ -1,5 +1,5 @@
 import { SvgUri } from "react-native-svg";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   useFonts,
@@ -25,7 +25,8 @@ import {
   FlatList,
   ActivityIndicator,
   Modal,
-  Alert
+  TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ellipse184 from "../../assets/Ellipse184.png";
@@ -51,6 +52,7 @@ function HomeScreenClient() {
   const [isModalTermsVisible, setModalTermsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [logoutQuestion, setLogoutQuestion] = useState(false);
+  const [modalMarginTop, setModalMarginTop] = useState(1000);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,6 +60,7 @@ function HomeScreenClient() {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
+        const tokenPush = await AsyncStorage.getItem("userTokenPush");
         const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
         if (token !== null) {
           const now = Date.now();
@@ -82,12 +85,17 @@ function HomeScreenClient() {
         }
         if (token !== null && id !== null) {
           // Realizar la petición GET con Axios
-          let [responseClient, responseShops] = await Promise.all([
+          let [responseClient, responseShops, responsePush] = await Promise.all([
             api.get(`/client/${id}`, { headers: { Authorization: token } }),
             api.get(`/owner/shops`, { headers: { Authorization: token } }),
+            api.patch(
+              `/client/tokenNotifications/${id}`,
+              { token: tokenPush },
+              { headers: { Authorization: token } }
+            ),
           ]);
-
           setShops(responseShops.data);
+          console.log(responsePush.data);
           await setClient(responseClient.data.client);
           if (responseClient.data.client.fechaCorte.length < 3) {
             setFechaCorte(responseClient.data.client.fechaCorte + " de cada mes");
@@ -133,44 +141,22 @@ function HomeScreenClient() {
 
   const navigation = useNavigation();
 
-  const handleLogout = () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setLogoutQuestion(false)
-      navigation.replace('Main')
-      AsyncStorage.clear()
-      setIsLoading(false)
-    }, 800);
-    
-  };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => Linking.openURL(item.link)}>
-      <View style={styles.clientBlock}>
-        <Image source={{ uri: item.profilePhoto }} style={{ width: 50, height: 50 }} />
-        <Text>{item.name}</Text>
-        <Image source={arrow} style={{ width: 30, height: 30 }} />
-      </View>
-    </TouchableOpacity>
+  const renderItem = useCallback(
+    ({ item }) => (
+      <TouchableOpacity onPress={() => Linking.openURL(item.link)}>
+        <View style={styles.clientBlock}>
+          <Image source={{ uri: item.profilePhoto }} style={{ width: 50, height: 50 }} />
+          <Text>{item.name}</Text>
+          <Image source={arrow} style={{ width: 30, height: 30 }} />
+        </View>
+      </TouchableOpacity>
+    ),
+    []
   );
 
   return (
     <SafeAreaProvider>
-      <Modal visible={logoutQuestion}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>¿Seguro que quieres cerrar sesión?</Text>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <TouchableOpacity style={styles.buttonPink} onPress={handleLogout}>
-                <Text style={styles.textStyle}>Si</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.buttonGrey} onPress={() => setLogoutQuestion(false)}>
-                <Text style={styles.textStyle}>No</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
       <Modal transparent={true} animationType={"none"} visible={isLoading}>
         <View
           style={{
@@ -190,12 +176,21 @@ function HomeScreenClient() {
         </View>
       </Modal>
       <View style={styles.welcome}>
-        <TouchableOpacity onPress={()=>setLogoutQuestion(true)}>
-          <Image style={styles.menu} source={logout} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setModalTermsVisible(true)}>
-          <Image style={styles.terms} source={Documents} />
-        </TouchableOpacity>
+        <View>
+          <TouchableWithoutFeedback
+            onPress={async () => {
+              await navigation.replace("Main");
+              AsyncStorage.clear();
+            }}
+          >
+            <Image style={styles.menu} source={logout} />
+          </TouchableWithoutFeedback>
+        </View>
+        <View>
+          <TouchableWithoutFeedback onPress={() => setModalTermsVisible(true)}>
+            <Image style={styles.terms} source={Documents} />
+          </TouchableWithoutFeedback>
+        </View>
         <Modal animationType="slide" transparent={true} visible={isModalTermsVisible}>
           <View style={styles.centeredView}>
             <ScrollView>
@@ -349,7 +344,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#554E4E",
     padding: 10,
     width: "40%",
-    marginRight:'10%',
+    marginRight: "10%",
     borderRadius: 40,
     marginBottom: 15,
   },
@@ -357,12 +352,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF0083",
     padding: 10,
     width: "40%",
-    marginLeft:'10%',
+    marginLeft: "10%",
     borderRadius: 40,
     marginBottom: 15,
   },
   welcome: {
-    paddingTop: 60,
+    paddingTop: 20,
     flex: 1,
     backgroundColor: "#FF0083",
     alignItems: "center",

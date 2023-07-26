@@ -23,6 +23,7 @@
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/logo.png",
         "backgroundColor": "#ffffff"
@@ -30,10 +31,8 @@
       "package": "com.carlosp04.prestohoy",
       "permissions": ["android.permission.CAMERA"],
       "config": {
-        "googlePlay": {
-          "permissions": ["com.google.android.gms.permission.CAMERA"]
-        }
-      }
+      },
+      "versionCode": 2
     },
     "extra": {
       "eas": {
