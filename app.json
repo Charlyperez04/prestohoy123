@@ -19,7 +19,8 @@
       "buildNumber": "1.0.11",
       "icon": "./src/assets/logo.png",
       "infoPlist": {
-        "NSCameraUsageDescription": "Necesitamos acceder a la camara para poder escanear los codigos QR de los clientes y hacer transacciones."
+        "NSCameraUsageDescription": "Necesitamos acceder a la camara para poder escanear los codigos QR de los clientes y hacer transacciones.",
+        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID."
       }
     },
     "android": {
@@ -29,10 +30,13 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.carlosp04.prestohoy",
-      "permissions": ["android.permission.CAMERA"],
-      "config": {
-      },
-      "versionCode": 2
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      "versionCode": 3
     },
     "extra": {
       "eas": {
@@ -59,6 +63,12 @@
           "username": "account-username"
         }
       ]
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ed1a88e8-3f27-4c41-91f8-a3c50058765c"
+    }
   }
 }
