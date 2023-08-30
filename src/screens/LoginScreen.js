@@ -65,6 +65,7 @@ async function registerForPushNotificationsAsync() {
 
 const LoginScreen = ({ navigation, route }) => {
   const { role } = route.params;
+  const {inputName}=route.params
   const [modalVisible, setModalVisible] = useState(true);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -224,10 +225,10 @@ const LoginScreen = ({ navigation, route }) => {
           <Text style={styles.modalTitle}>Iniciar sesión</Text>
           <Text style={styles.modalSubtitle}>Ingresa tus credenciales de acceso</Text>
 
-          <Text style={styles.inputLabel}>Nombre</Text>
+          <Text style={styles.inputLabel}>{inputName}</Text>
           <TextInput
             style={styles.inputField}
-            placeholder="Nombre completo"
+            placeholder="Nombre"
             onChangeText={setName}
             value={name}
           />
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: -15,
     backgroundColor: "white",
-    width: "21%",
+    maxWidth:'50%',
     color: "#6E717C",
     alignSelf: "center",
     marginRight: 160,

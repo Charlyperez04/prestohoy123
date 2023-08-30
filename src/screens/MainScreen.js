@@ -17,13 +17,13 @@ const MainScreen = ({ navigation }) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.buttonPink}
-          onPress={() => navigation.navigate("Login", { role: "client" })}
+          onPress={() => navigation.navigate("Login", { role: "client",inputName:'Nombre' })}
         >
           <Text style={styles.buttonTextWhite}>Soy Comprador</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonPink}
-          onPress={() => navigation.navigate("Login", { role: "shop" })}
+          onPress={() => navigation.navigate("Login", { role: "shop", inputName:'Nombre del negocio'})}
         >
           <Text style={styles.buttonTextWhite}>Soy Vendedor</Text>
         </TouchableOpacity>
