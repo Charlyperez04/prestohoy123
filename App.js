@@ -26,18 +26,6 @@ export default function App() {
     Poppins_900Black
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://10.0.2.2:5000/');
-        console.log(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   return (
     fontsLoaded ? <AppNavigator/> : null

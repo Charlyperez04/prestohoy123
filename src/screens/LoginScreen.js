@@ -45,8 +45,7 @@ async function registerForPushNotificationsAsync() {
       return;
     }
     token = (await Notifications.getExpoPushTokenAsync()).data;
-    AsyncStorage.setItem("userTokenPush", token),
-    console.log(token);
+    AsyncStorage.setItem("userTokenPush", token)
   } else {
     alert("Must use physical device for Push Notifications");
   }

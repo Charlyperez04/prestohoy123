@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
-  Alert
+  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
@@ -17,7 +17,6 @@ import EditModalConfirmation from "./EditModalConfirmation";
 import * as Updates from "expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../../api/connection";
-
 
 const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const [fullName, setFullName] = useState("");
@@ -32,11 +31,13 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
   const [ineBackImage, setIneBackImage] = useState(null);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [fechaCorte, setFechaCorte] = useState("");
-  const [fechaPago, setFechaPago] = useState("");
+  const [fechaCorte, setFechaCorte] = useState("Por definir");
+  const [fechaPago, setFechaPago] = useState("Por definir");
   const [montoFinal, setMontoFinal] = useState("");
   const [date, setDate] = useState(new Date());
+  const [showCut, setShowCut] = useState(false);
   const [show, setShow] = useState(false);
+  const [showLimit, setShowLimit] = useState(false);
   const [dateSet, setDateSet] = useState(false);
   const [mode, setMode] = useState("date");
   const handleConfirm = async () => {
@@ -55,17 +56,10 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
       formData.append("maxCredit", maxCredit);
       formData.append("bornDate", dateOfBirth);
       formData.append("usedCredit", usedCredit);
-      if(
-        fechaCorte && fechaPago && montoFinal
-      ){
       formData.append("fechaCorte", fechaCorte);
       formData.append("fechaPago", fechaPago);
       formData.append("montoFinal", montoFinal);
-      }else{
-      formData.append("fechaCorte",'Por definir');
-      formData.append("fechaPago", 'Por definir');
-      formData.append("montoFinal",'Por definir');
-      }
+
       // Ensure that an image has been selected
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
@@ -81,12 +75,8 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
         type: `image/${fileType}`,
       });
       if (!ineFrontImage) {
-        Alert.alert(
-          "Error",
-          'Seleccione una foto frontal de INE'
-        );
+        Alert.alert("Error", "Seleccione una foto frontal de INE");
       }
-
       const uriPartsFront = ineFrontImage.split(".");
       const fileTypeFront = uriPartsFront[uriPartsFront.length - 1];
       formData.append("frontIne", {
@@ -95,10 +85,7 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
         type: `image/${fileTypeFront}`,
       });
       if (!ineBackImage) {
-        Alert.alert(
-          "Error",
-          'Seleccione una foto trasera de INE'
-        );
+        Alert.alert("Error", "Seleccione una foto trasera de INE");
       }
       const uriPartsBack = ineBackImage.split(".");
       const fileTypeBack = uriPartsBack[uriPartsBack.length - 1];
@@ -137,12 +124,35 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
     setConfirmationVisible(true);
   };
   const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === "ios");
-    setDate(currentDate);
-    setDateSet(true);
-    
-    setDateOfBirth(currentDate.toDateString());
+    setShow(false);
+
+    const processedDate = new Date(selectedDate); // Renombrado para evitar la duplicación de variables
+    const day = processedDate.getDate();
+    const month = processedDate.getMonth() + 1;
+    const year = processedDate.getFullYear();
+
+    const fullDate = `${day}/${month}/${year}`;
+    setDateOfBirth(fullDate);
+  };
+  const onChangeLimit = (event, selectedDate) => {
+    setShowLimit(false);
+    const processedDate = new Date(selectedDate); 
+    const day = processedDate.getDate();
+    const month = processedDate.getMonth() + 1;
+    const year = processedDate.getFullYear();
+
+    const fullDate = `${day}/${month}/${year}`;
+    setFechaPago(fullDate);
+  };
+  const onChangeCut = (event, selectedDate) => {
+    setShowCut(false);
+    const processedDate = new Date(selectedDate); // Renombrado para evitar la duplicación de variables
+    const day = processedDate.getDate();
+    const month = processedDate.getMonth() + 1;
+    const year = processedDate.getFullYear();
+
+    const fullDate = ` ${day}/${month}/${year}`;
+    setFechaCorte(fullDate);
   };
   const showMode = (currentMode) => {
     setShow(true);
@@ -215,28 +225,27 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
             />
 
             <Text style={styles.textCamp}>Fecha de nacimiento:</Text>
-            <TouchableOpacity onPress={showDatepicker} style={styles.formInputFotos}>
+            <TouchableOpacity onPress={() => setShow(true)} style={styles.formInputFotos}>
               <Text
                 style={{
-                  color: "black" 
+                  color: "black",
                 }}
               >
-                {dateOfBirth}
+                {dateOfBirth ? dateOfBirth : "Inserte fecha"}
               </Text>
 
               {show && (
                 <DateTimePicker
                   style={styles.datePicker}
                   testID="dateTimePicker"
-                  value={date}
-                  mode={mode}
+                  value={new Date()}
+                  mode="date"
                   is24Hour={true}
                   display="default"
                   onChange={onChange}
                 />
               )}
             </TouchableOpacity>
-
 
             <Text style={styles.textCamp}>Dirección:</Text>
             <TextInput
@@ -254,19 +263,50 @@ const AddUserModal = ({ visible, closeModal, refreshData, setRefreshData }) => {
               onChangeText={setPassword}
             />
             <Text style={styles.textCamp}>Fecha de corte:</Text>
-            <TextInput
-              placeholder="Puede dejar vacio este campo"
-              style={styles.textInput}
-              value={fechaCorte}
-              onChangeText={setFechaCorte}
-            />
+            <TouchableOpacity onPress={() => setShowCut(true)} style={styles.formInputFotos}>
+              <Text
+                style={{
+                  color: "black",
+                }}
+              >
+                {fechaCorte}
+              </Text>
+
+              {showCut && (
+                <DateTimePicker
+                  style={styles.datePicker}
+                  testID="dateTimePicker"
+                  value={new Date()}
+                  mode="date"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChangeCut}
+                />
+              )}
+            </TouchableOpacity>
             <Text style={styles.textCamp}>Fecha limite de pago:</Text>
-            <TextInput
-              placeholder="Puede dejar vacio este campo"
-              style={styles.textInput}
-              value={fechaPago}
-              onChangeText={setFechaPago}
-            />
+          
+              <TouchableOpacity onPress={() => setShowLimit(true)} style={styles.formInputFotos}>
+              <Text
+                style={{
+                  color: "black",
+                }}
+              >
+                {fechaPago}
+              </Text>
+
+              {showLimit && (
+                <DateTimePicker
+                  style={styles.datePicker}
+                  testID="dateTimePicker"
+                  value={new Date()}
+                  mode="date"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChangeLimit}
+                />
+              )}
+            </TouchableOpacity>
             <Text style={styles.textCamp}>Monto final con intereses:</Text>
             <TextInput
               placeholder="Puede dejar vacio este campo"

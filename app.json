@@ -36,7 +36,7 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ],
-      "versionCode": 3
+      "versionCode": 5
     },
     "extra": {
       "eas": {

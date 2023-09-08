@@ -24,9 +24,6 @@ const AppNavigator = () => {
       const userId = await AsyncStorage.getItem('userId');
 
       if (userToken && userRole && userId) {
-        console.log(
-          `User token: ${userToken}, user role: ${userRole}, user id: ${userId}`,
-        );
         // Si se encuentran los datos almacenados, se establece la ruta inicial en función del rol
         if (userRole === 'client'&&userId) {
           setInitialRoute('ClientScreens');

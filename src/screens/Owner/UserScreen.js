@@ -156,7 +156,6 @@ const UsersScreen = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(response.data);
       setIsLoading(false);
       setConfirmationVisible(true);
       setRefreshData(true);
@@ -387,16 +386,16 @@ const UsersScreen = () => {
                     <View style={styles.userDataLine}>
                       <Text style={styles.userDataName}>Fecha de corte: </Text>
                       <Text style={styles.userDataText}>
-                        {selectedClient.fechaCorte.length <= 3
-                          ? selectedClient.fechaCorte + " de cada mes"
+                        {selectedClient.fechaCorte.length >= 2
+                          ? selectedClient.fechaCorte
                           : "Fecha por definir"}
                       </Text>
                     </View>
                     <View style={styles.userDataLine}>
                       <Text style={styles.userDataName}>Fecha limite de pago: </Text>
                       <Text style={styles.userDataText}>
-                        {selectedClient.fechaPago.length <= 3
-                          ? selectedClient.fechaPago + " de cada mes"
+                        {selectedClient.fechaPago.length >= 2
+                          ? selectedClient.fechaPago
                           : "Fecha por definir"}
                       </Text>
                     </View>

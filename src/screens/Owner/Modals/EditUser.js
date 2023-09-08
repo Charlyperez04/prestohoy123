@@ -1,6 +1,15 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState, useEffect } from "react";
-import { Modal, Text, TouchableOpacity, View, TextInput, StyleSheet, Image,ActivityIndicator } from "react-native";
+import {
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import EditModalConfirmation from "./EditModalConfirmation";
@@ -23,29 +32,30 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
   const [userToken, setUserToken] = useState("");
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
+  const [showCut, setShowCut] = useState(false);
+  const [showLimit, setShowLimit] = useState(false);
   const [dateSet, setDateSet] = useState(false);
   const [mode, setMode] = useState("date");
   const [isLoading, setIsLoading] = useState(false);
-  const[fechaCorte,setFechaCorte]=useState("")
-  const [fechaPago,setFechaPago]=useState("")
-  const [montoFinal,setMontoFinal]=useState("")
-  const [usedCredit,setUsedCredit]=useState("")
+  const [fechaCorte, setFechaCorte] = useState("");
+  const [fechaPago, setFechaPago] = useState("");
+  const [montoFinal, setMontoFinal] = useState("");
+  const [usedCredit, setUsedCredit] = useState("");
   const [profileOriginalImage, setProfileOriginalImage] = useState(null);
   const [ineFrontOriginalImage, setIneFrontOriginalImage] = useState(null);
   const [ineBackOriginalImage, setIneBackOriginalImage] = useState(null);
-  
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
-        
+
         if (token !== null) {
           setUserToken(token);
         }
-        
+
         if (token !== null) {
           // Realizar la petición GET con Axios
           let [responseClient] = await Promise.all([
@@ -64,41 +74,65 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
           setIneFrontImage(responseClient.data.client.frontIne);
           setIneBackImage(responseClient.data.client.backIne);
           setPassword(responseClient.data.client.password);
-          setFechaCorte(responseClient.data.client.fechaCorte)
-          setFechaPago(responseClient.data.client.fechaPago)
-          setMontoFinal(responseClient.data.client.montoFinal)
+          setFechaCorte(responseClient.data.client.fechaCorte);
+          setFechaPago(responseClient.data.client.fechaPago);
+          setMontoFinal(responseClient.data.client.montoFinal);
           setProfileOriginalImage(responseClient.data.client.profilePhoto);
           setIneFrontOriginalImage(responseClient.data.client.frontIne);
-          setIneBackOriginalImage(responseClient.data.client.backIne)
-          
+          setIneBackOriginalImage(responseClient.data.client.backIne);
         }
       } catch ({ error, response }) {
         console.error(error);
         console.log(response.data);
       }
     };
-    
+
     fetchData();
   }, []);
   const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === "ios");
-    setDate(currentDate);
-    setDateSet(true);
-    
-    setDateOfBirth(currentDate.toDateString());
+    setShow(false);
+
+    const processedDate = new Date(selectedDate); // Renombrado para evitar la duplicación de variables
+    const day = processedDate.getDate();
+    const month = processedDate.getMonth() + 1;
+    const year = processedDate.getFullYear();
+
+    const fullDate = `${day}/${month}/${year}`;
+    setDateOfBirth(fullDate);
+  };
+
+  const onChangeCut = (event, selectedDate) => {
+    setShowCut(false);
+    const processedDate = new Date(selectedDate); // Renombrado para evitar la duplicación de variables
+    const day = processedDate.getDate();
+    const month = processedDate.getMonth() + 1;
+    const year = processedDate.getFullYear();
+
+    const fullDate = ` ${day}/${month}/${year}`;
+    setFechaCorte(fullDate);
+  };
+
+  const onChangeLimit = (event, selectedDate) => {
+    setShowLimit(false);
+    const processedDate = new Date(selectedDate); 
+    const day = processedDate.getDate();
+    const month = processedDate.getMonth() + 1;
+    const year = processedDate.getFullYear();
+
+    const fullDate = `${day}/${month}/${year}`;
+    setFechaPago(fullDate);
   };
   const showDatepicker = () => {
     showMode("date");
   };
+
   const handleConfirm = async () => {
     setIsLoading(true);
     try {
-
       const token = await AsyncStorage.getItem("userToken");
-      
+
       const formData = new FormData();
-      
+
       // Add all the text data
       formData.append("name", fullName);
       formData.append("phoneNumber", phoneNumber);
@@ -108,86 +142,73 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
       formData.append("maxCredit", maxCredit);
       formData.append("bornDate", dateOfBirth);
       formData.append("usedCredit", usedCredit);
-     if(fechaCorte){
       formData.append("fechaCorte", fechaCorte);
-     }
-     if(fechaPago){
       formData.append("fechaPago", fechaPago);
-     }
-      if(montoFinal){
-        formData.append("montoFinal", montoFinal);
-      }
+      formData.append("montoFinal", montoFinal);
 
       // Ensure that an image has been selected
       if (!profileImage) {
         throw new Error("Debe seleccionar una imagen antes de continuar.");
       }
-      if(profileImage!==profileOriginalImage){
-      // Add the image
-      console.log(profileImage);
-      const uriParts = profileImage.split(".");
-      const fileType = uriParts[uriParts.length - 1];
-      
-      formData.append("profilePhoto", {
-        uri: profileImage,
-        name: `photo.${fileType}`,
-        type: `image/${fileType}`,
-      });
-    }
-      if (!ineFrontImage) {
-        Alert.alert(
-          "Error",
-          'Seleccione una foto frontal de INE'
-        );
-      }
-     
-      if(ineFrontImage!==ineFrontOriginalImage){
-      const uriPartsFront = ineFrontImage.split(".");
-      const fileTypeFront = uriPartsFront[uriPartsFront.length - 1];
-      formData.append("frontIne", {
-        uri: ineFrontImage,
-        name: `photo.${fileTypeFront}`,
-        type: `image/${fileTypeFront}`,
-      });
-    }
-      if (!ineBackImage) {
-        Alert.alert(
-          "Error",
-          'Seleccione una foto trasera de INE'
-        );
-      }
-      if(ineBackImage!==ineBackOriginalImage){
-      const uriPartsBack = ineBackImage.split(".");
-      const fileTypeBack = uriPartsBack[uriPartsBack.length - 1];
-      formData.append("backIne", {
-        uri: ineBackImage,
-        name: `photo.${fileTypeBack}`,
-        type: `image/${fileTypeBack}`,
-      })};
+      if (profileImage !== profileOriginalImage) {
+        // Add the image
+        console.log(profileImage);
+        const uriParts = profileImage.split(".");
+        const fileType = uriParts[uriParts.length - 1];
 
-      let response=await api.put(`/owner/clients/${idClient}`, formData, {
+        formData.append("profilePhoto", {
+          uri: profileImage,
+          name: `photo.${fileType}`,
+          type: `image/${fileType}`,
+        });
+      }
+      if (!ineFrontImage) {
+        Alert.alert("Error", "Seleccione una foto frontal de INE");
+      }
+
+      if (ineFrontImage !== ineFrontOriginalImage) {
+        const uriPartsFront = ineFrontImage.split(".");
+        const fileTypeFront = uriPartsFront[uriPartsFront.length - 1];
+        formData.append("frontIne", {
+          uri: ineFrontImage,
+          name: `photo.${fileTypeFront}`,
+          type: `image/${fileTypeFront}`,
+        });
+      }
+      if (!ineBackImage) {
+        Alert.alert("Error", "Seleccione una foto trasera de INE");
+      }
+      if (ineBackImage !== ineBackOriginalImage) {
+        const uriPartsBack = ineBackImage.split(".");
+        const fileTypeBack = uriPartsBack[uriPartsBack.length - 1];
+        formData.append("backIne", {
+          uri: ineBackImage,
+          name: `photo.${fileTypeBack}`,
+          type: `image/${fileTypeBack}`,
+        });
+      }
+
+      let response = await api.put(`/owner/clients/${idClient}`, formData, {
         headers: {
           Authorization: token,
           "Content-Type": "multipart/form-data",
         },
       });
-      setIsLoading(false)
+      setIsLoading(false);
       setConfirmationVisible(true);
-      
-} catch (error) {
-  console.error(error);
-  console.log(error.message);
-  console.log(error.config);
-  setIsLoading(false)
-  if (error.response) {
-    console.log(error.response.data);
-    console.log(error.response.status);
-    console.log(error.response.headers);
-  }
-}
-
+    } catch (error) {
+      console.error(error);
+      console.log(error.message);
+      console.log(error.config);
+      setIsLoading(false);
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      }
+    }
   };
-  
+
   const handleOpenConfirmationModal = () => {
     setConfirmationVisible(true);
   };
@@ -199,22 +220,22 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
     setConfirmationVisible(false);
     closeModal();
   };
-  
+
   const selectImage = async (setImage) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== "granted") {
       alert("Se requiere acceso a la galería para seleccionar una imagen.");
       return;
     }
-    
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-    
+
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setImage(result.assets[0].uri);
     }
@@ -224,23 +245,23 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
     setConfirmationVisible(false); // Establece la visibilidad del modal de confirmación como falso
     // Código adicional para abrir el modal anterior
   };
-  
+
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={closeModal}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-        <Modal transparent={true} animationType={"none"} visible={isLoading}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                <ActivityIndicator size="large" color="#FF0083" />
-              </View>
-            </Modal>
+          <Modal transparent={true} animationType={"none"} visible={isLoading}>
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+              }}
+            >
+              <ActivityIndicator size="large" color="#FF0083" />
+            </View>
+          </Modal>
           <ScrollView>
             <Text style={styles.modalTitle}>Editar usuario</Text>
             <Text style={styles.modalSubtitle}>Deje vacíos los campos que no va a editar</Text>
@@ -270,10 +291,10 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
               onChangeText={setMaxCredit}
             />
             <Text style={styles.textCamp}>Fecha de nacimiento:</Text>
-            <TouchableOpacity onPress={showDatepicker} style={styles.formInputFotos}>
+            <TouchableOpacity onPress={() => setShow(true)} style={styles.formInputFotos}>
               <Text
                 style={{
-                  color: "black" 
+                  color: "black",
                 }}
               >
                 {dateOfBirth}
@@ -283,8 +304,8 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
                 <DateTimePicker
                   style={styles.datePicker}
                   testID="dateTimePicker"
-                  value={date}
-                  mode={mode}
+                  mode="date"
+                  value={new Date()}
                   is24Hour={true}
                   display="default"
                   onChange={onChange}
@@ -309,19 +330,49 @@ const EditUserModal = ({ visible, closeModal, idClient, refreshData, setRefreshD
             />
 
             <Text style={styles.textCamp}>Fecha de corte:</Text>
-            <TextInput
-              placeholder="Puede dejar vacio este campo"
-              style={styles.textInput}
-              value={fechaCorte.toString()}
-              onChangeText={setFechaCorte}
-            />
+            <TouchableOpacity onPress={() => setShowCut(true)} style={styles.formInputFotos}>
+              <Text
+                style={{
+                  color: "black",
+                }}
+              >
+                {fechaCorte}
+              </Text>
+
+              {showCut && (
+                <DateTimePicker
+                  style={styles.datePicker}
+                  testID="dateTimePicker"
+                  value={new Date()}
+                  mode="date"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChangeCut}
+                />
+              )}
+            </TouchableOpacity>
             <Text style={styles.textCamp}>Fecha limite de pago:</Text>
-            <TextInput
-              placeholder="Puede dejar vacio este campo"
-              style={styles.textInput}
-              value={fechaPago.toString()}
-              onChangeText={setFechaPago}
-            />
+            <TouchableOpacity onPress={() => setShowLimit(true)} style={styles.formInputFotos}>
+              <Text
+                style={{
+                  color: "black",
+                }}
+              >
+                {fechaPago}
+              </Text>
+
+              {showLimit && (
+                <DateTimePicker
+                  style={styles.datePicker}
+                  testID="dateTimePicker"
+                  value={new Date()}
+                  mode="date"
+                  is24Hour={true}
+                  display="default"
+                  onChange={onChangeLimit}
+                />
+              )}
+            </TouchableOpacity>
             <Text style={styles.textCamp}>Monto final con intereses:</Text>
             <TextInput
               placeholder="Puede dejar vacio este campo"

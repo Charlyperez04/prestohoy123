@@ -97,16 +97,8 @@ function HomeScreenClient() {
           setShops(responseShops.data);
           console.log(responsePush.data);
           await setClient(responseClient.data.client);
-          if (responseClient.data.client.fechaCorte.length < 3) {
-            setFechaCorte(responseClient.data.client.fechaCorte + " de cada mes");
-          } else {
-            setFechaCorte("Por definir");
-          }
-          if (responseClient.data.client.fechaPago.length < 3) {
-            setFechaPago(responseClient.data.client.fechaPago + " de cada mes");
-          } else {
-            setFechaPago("Por definir");
-          }
+          setFechaCorte(responseClient.data.client.fechaCorte);
+          setFechaPago(responseClient.data.client.fechaPago);
 
           // Actualizar el estado con los datos recibidos
         }
@@ -140,7 +132,6 @@ function HomeScreenClient() {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const navigation = useNavigation();
-
 
   const renderItem = useCallback(
     ({ item }) => (
@@ -318,7 +309,7 @@ function HomeScreenClient() {
                 Fecha limite de pago:
               </Text>
               <Text style={{ fontSize: 15, fontFamily: "Poppins_700Bold", textAlign: "right" }}>
-                {fechaPago ? fechaPago : ""}
+                {fechaPago}
               </Text>
             </View>
           </View>
