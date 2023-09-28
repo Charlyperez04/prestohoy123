@@ -189,21 +189,37 @@ function HomeScreenShop({ navigation }) {
   const handleTransaction = async (amount) => {
     let concepto = "transaccion";
     try {
-      let [responseTransaction] = await Promise.all([
+      let [responseTransaction, responseOwner] = await Promise.all([
         api.post(
           `/shop/transactions`,
           { amount: amount, clientId: client._id, shopId: userId, pin: nip, concept: concepto },
           { headers: { Authorization: userToken } }
         ),
+        api.get(`/owner/profile/64bd7d2d86a8ac8b5b7c3280`, { headers: { Authorization: userToken } }),
       ]);
+      console.log(responseOwner.data);
+      const message = {
+        to: responseOwner.data.tokenNotifications,
+        sound: "default",
+        title: "PrestoHoy",
+        body: `El cliente ${client.name} ha realizado una transaccion`,
+      };
+
+      await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+      });
       setTransactionDataVisible(false);
-      console.log(responseTransaction.data);
       setTransactionData(responseTransaction.data.transaction);
       setTransactionModalFinished(true);
-    } catch ({ e, response }) {
+    } catch (e) {
       setTransactionModalDenied(true);
       console.error(e);
-      console.log(response.data);
     }
   };
 
@@ -226,18 +242,17 @@ function HomeScreenShop({ navigation }) {
     Poppins_900Black,
   });
 
-  const [isModalVisible, setModalVisible] = React.useState(false);
-
   return (
     <SafeAreaProvider>
       <View style={styles.welcome}>
         <View onPress={handleLogout}>
-        <TouchableWithoutFeedback 
-          onPress={async () => {
-           await navigation.replace("Main");
-            AsyncStorage.clear();
-          }}>
-          <Image style={styles.menu} source={logout} />
+          <TouchableWithoutFeedback
+            onPress={async () => {
+              await navigation.replace("Main");
+              AsyncStorage.clear();
+            }}
+          >
+            <Image style={styles.menu} source={logout} />
           </TouchableWithoutFeedback>
         </View>
         <NipModal

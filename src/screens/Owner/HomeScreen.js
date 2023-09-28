@@ -63,7 +63,8 @@ function HomeScreen({ navigation }) {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
-        const expiryDate = await AsyncStorage.getItem("tokenExpiry"); // obtienes la fecha de expiración
+        const expiryDate = await AsyncStorage.getItem("tokenExpiry");
+        const tokenPush = await AsyncStorage.getItem("userTokenPush"); // obtienes la fecha de expiración
         if (token !== null) {
           const now = Date.now();
           const expiryTime = Number(expiryDate); // ya está en milisegundos, no necesitas convertir
@@ -87,15 +88,21 @@ function HomeScreen({ navigation }) {
         }
         if (token !== null && id !== null) {
           // Realizar la petición GET con Axios
-          let [responseOwner, responseClients, responseShops, responseTransactions] = await Promise.all([
-            api.get(`/owner/profile/${id}`, { headers: { Authorization: token } }),
-            api.get(`/owner/clients`, { headers: { Authorization: token } }),
-            api.get(`/owner/shops`, { headers: { Authorization: token } }),
-            api.get(`/owner/transactions`, { headers: { Authorization: token } }),
-          ]);
+          let [responseOwner, responseClients, responseShops, responseTransactions, responsePush] =
+            await Promise.all([
+              api.get(`/owner/profile/${id}`, { headers: { Authorization: token } }),
+              api.get(`/owner/clients`, { headers: { Authorization: token } }),
+              api.get(`/owner/shops`, { headers: { Authorization: token } }),
+              api.get(`/owner/transactions`, { headers: { Authorization: token } }),
+              api.patch(
+                `/owner/tokenNotifications/${id}`,
+                { token: tokenPush },
+                { headers: { Authorization: token } }
+              ),
+            ]);
 
           // Actualizar el estado con los datos recibidos
-
+          console.log(responsePush.data);
           setUserName(responseOwner.data.name);
           setTransactions(responseTransactions.data);
           setShops(responseShops.data);
@@ -126,29 +133,28 @@ function HomeScreen({ navigation }) {
   }, [reloadScreen]);
 
   const handleLogout = () => {
-    setIsLoading(true)
+    setIsLoading(true);
     setTimeout(() => {
-      setLogoutQuestion(false)
-      navigation.replace('Main')
-      AsyncStorage.clear()
-      setIsLoading(false)
+      setLogoutQuestion(false);
+      navigation.replace("Main");
+      AsyncStorage.clear();
+      setIsLoading(false);
     }, 800);
-    
   };
   const handleResetSpent = useCallback(async () => {
     try {
       const userToken = await AsyncStorage.getItem("userToken");
       const id = await AsyncStorage.getItem("userId");
       console.log(userToken);
-      const response =  await api.patch(
+      const response = await api.patch(
         `/owner/resetSpent/${id}`,
         { status: "done" },
         { headers: { Authorization: userToken } }
-        );
-        setTotalSpent(response.data.totalSpent);
-        setResetCounterModal(false);
-        console.log(response.data);
-        setReloadScreen(true)
+      );
+      setTotalSpent(response.data.totalSpent);
+      setResetCounterModal(false);
+      console.log(response.data);
+      setReloadScreen(true);
     } catch ({ error, response }) {
       console.error(error);
       console.log(response.data);
@@ -242,7 +248,7 @@ function HomeScreen({ navigation }) {
           </View>
         </View>
       </Modal>
-       <Modal transparent={true} animationType={"none"} visible={isLoading}>
+      <Modal transparent={true} animationType={"none"} visible={isLoading}>
         <View
           style={{
             position: "absolute",
@@ -299,7 +305,6 @@ function HomeScreen({ navigation }) {
             paddingHorizontal: 30,
           }}
         >
-       
           <View style={styles.dataBlock}>
             <Text style={styles.dataTitleBlock}>Total Otorgado</Text>
             <Text style={styles.dataTextBlock}>${totalCredit}</Text>
@@ -611,7 +616,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Poppins_600SemiBold",
     color: "#FF0083",
-    alignSelf:'center'
+    alignSelf: "center",
   },
   welcomeText: {
     fontSize: 18,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useCallback} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   useFonts,
   Poppins_100Thin,
@@ -11,11 +11,20 @@ import {
   Poppins_800ExtraBold,
   Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Modal,ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import api from '../../api/connection'
+import api from "../../api/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import moment from 'moment'
+import moment from "moment";
 import trash from "../../assets/trash.png";
 import logout from "../../assets/logout.png";
 import pending from "../../assets/pending.png";
@@ -29,13 +38,12 @@ function HomeScreen() {
   const [transactions, setTransactions] = useState([]);
   const [pendingTransactions, setPendingTransactions] = useState(0);
   const [userToken, setUserToken] = useState(null);
-  const [userRole, setUserRole] = useState(null)
-  const [userId, setUserId] = useState(null)
-  const [isLoading,setIsLoading]=useState(false)
-  
+  const [userRole, setUserRole] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true)
+    setIsLoading(true);
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
@@ -53,8 +61,7 @@ function HomeScreen() {
         }
         if (token !== null && id !== null) {
           // Realizar la petición GET con Axios
-          let [ responseTransactions] = await Promise.all([
-   
+          let [responseTransactions] = await Promise.all([
             api.get(`/owner/transactions`, { headers: { Authorization: token } }),
           ]);
 
@@ -68,9 +75,8 @@ function HomeScreen() {
     };
 
     fetchData();
-    setIsLoading(false)
+    setIsLoading(false);
   }, []);
-
 
   const handlePress = useCallback(
     async (transactionId, action, item) => {
@@ -131,8 +137,6 @@ function HomeScreen() {
     setModalVisible(false);
   };
 
-
-
   useFonts({
     Poppins_100Thin,
     Poppins_200ExtraLight,
@@ -147,18 +151,18 @@ function HomeScreen() {
 
   return (
     <SafeAreaProvider>
-       <Modal transparent={true} animationType={"none"} visible={isLoading}>
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                }}
-              >
-                <ActivityIndicator size="large" color="#FF0083" />
-              </View>
-            </Modal>
+      <Modal transparent={true} animationType={"none"} visible={isLoading}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <ActivityIndicator size="large" color="#FF0083" />
+        </View>
+      </Modal>
       <View style={styles.creditBussines}>
         <View
           style={{
@@ -178,125 +182,125 @@ function HomeScreen() {
           </Text>
         </View>
         <View style={{ marginBottom: 25 }}>
-        <FlatList
-              data={transactions}
-              keyExtractor={(item) => item._id}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handlePressTransaction(item._id)}>
-                  {selectedTransaction === item._id && (
-                    <View style={{ flexDirection: "row" }}>
-                      <TouchableOpacity onPress={() => handlePress(item._id, "done", item)}>
-                        <Image style={styles.buttonImage} source={tick} />
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => handlePress(item._id, "pending", item)}>
-                        <Image style={styles.buttonImage} source={pending} />
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => handlePress(item._id, "delete")}>
-                        <Image style={styles.buttonImage} source={trash} />
-                      </TouchableOpacity>
+          <FlatList
+            data={transactions}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => handlePressTransaction(item._id)}>
+                {selectedTransaction === item._id && (
+                  <View style={{ flexDirection: "row" }}>
+                    <TouchableOpacity onPress={() => handlePress(item._id, "done", item)}>
+                      <Image style={styles.buttonImage} source={tick} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handlePress(item._id, "pending", item)}>
+                      <Image style={styles.buttonImage} source={pending} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handlePress(item._id, "delete")}>
+                      <Image style={styles.buttonImage} source={trash} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                <View style={styles.transactionBlock}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Image
+                      style={styles.statusImage}
+                      source={
+                        item.status === "done"
+                          ? require("../../assets/tick.png")
+                          : require("../../assets/pending.png")
+                      }
+                    />
+                    <View>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: "Poppins_600SemiBold",
+                          color: "#0000009D",
+                        }}
+                      >
+                        De:
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Poppins_400Regular",
+                        }}
+                      >
+                        {item.clientName}
+                      </Text>
                     </View>
-                  )}
-                  <View style={styles.transactionBlock}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                      <Image
-                        style={styles.statusImage}
-                        source={
-                          item.status === "done"
-                            ? require("../../assets/tick.png")
-                            : require("../../assets/pending.png")
-                        }
-                      />
-                      <View>
-                        <Text
-                          style={{
-                            fontSize: 13,
-                            fontFamily: "Poppins_600SemiBold",
-                            color: "#0000009D",
-                          }}
-                        >
-                          De:
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontFamily: "Poppins_400Regular",
-                          }}
-                        >
-                          {item.clientName}
-                        </Text>
-                      </View>
-                      <View style={{ justifyContent: "flex-start", width: "50%" }}>
-                        <Text
-                          style={{
-                            fontSize: 13,
-                            fontFamily: "Poppins_600SemiBold",
+                    <View style={{ justifyContent: "flex-start", width: "50%" }}>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: "Poppins_600SemiBold",
 
-                            color: "#0000009D",
-                            textAlign: "left",
-                          }}
-                        >
-                          Monto:
-                        </Text>
-                        <Text
-                          style={{
-                            textAlign: "center",
-                            fontFamily: "Poppins_600SemiBold",
-                            fontSize: 14,
-                            color: "#00A31A",
-                          }}
-                        >
-                          ${item.amount}
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                      <View>
-                        <Text
-                          style={{
-                            fontSize: 13,
-                            fontFamily: "Poppins_600SemiBold",
-                            color: "#0000009D",
-                            marginTop: 5,
-                          }}
-                        >
-                          Para:
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontFamily: "Poppins_400Regular",
-                          }}
-                        >
-                          {item.shopName}
-                        </Text>
-                      </View>
-                      <View style={{ justifyContent: "flex-start", width: "50%" }}>
-                        <Text
-                          style={{
-                            fontSize: 13,
-                            fontFamily: "Poppins_600SemiBold",
-                            color: "#0000009D",
-                            textAlign: "center",
-                          }}
-                        >
-                          Fecha y hora:
-                        </Text>
-                        <Text
-                          style={{
-                            textAlign: "center",
-                            fontFamily: "Poppins_600SemiBold",
-                            fontSize: 14,
-                            color: "#CA2D0A",
-                          }}
-                        > 
-                          {moment(item.timestamp).subtract(1, "hour").format("YYYY-MM-DD HH:mm")}
-                        </Text>
-                      </View>
+                          color: "#0000009D",
+                          textAlign: "left",
+                        }}
+                      >
+                        Monto:
+                      </Text>
+                      <Text
+                        style={{
+                          textAlign: "center",
+                          fontFamily: "Poppins_600SemiBold",
+                          fontSize: 14,
+                          color: "#00A31A",
+                        }}
+                      >
+                        ${item.amount}
+                      </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
-              )}
-            />
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <View>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: "Poppins_600SemiBold",
+                          color: "#0000009D",
+                          marginTop: 5,
+                        }}
+                      >
+                        Para:
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Poppins_400Regular",
+                        }}
+                      >
+                        {item.shopName}
+                      </Text>
+                    </View>
+                    <View style={{ justifyContent: "flex-start", width: "50%" }}>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: "Poppins_600SemiBold",
+                          color: "#0000009D",
+                          textAlign: "center",
+                        }}
+                      >
+                        Fecha y hora:
+                      </Text>
+                      <Text
+                        style={{
+                          textAlign: "center",
+                          fontFamily: "Poppins_600SemiBold",
+                          fontSize: 14,
+                          color: "#CA2D0A",
+                        }}
+                      >
+                        {moment(item.timestamp).subtract(1, "hour").format("YYYY-MM-DD HH:mm")}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
         </View>
         <Modal
           animationType="slide"

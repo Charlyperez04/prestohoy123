@@ -48,7 +48,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "Solicitamos permiso para acceder a tus fotos para las funciones de la app."
         }
       ],
       [
@@ -61,6 +61,13 @@
         "expo-updates",
         {
           "username": "account-username"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/logo.png",
+          "androidIcon":"./src/assets/logo.png"
         }
       ]
     ],

@@ -51,8 +51,6 @@ function HomeScreenClient() {
   const [fechaPago, setFechaPago] = useState("");
   const [isModalTermsVisible, setModalTermsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [logoutQuestion, setLogoutQuestion] = useState(false);
-  const [modalMarginTop, setModalMarginTop] = useState(1000);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,6 +94,7 @@ function HomeScreenClient() {
           ]);
           setShops(responseShops.data);
           console.log(responsePush.data);
+          console.log(tokenPush);
           await setClient(responseClient.data.client);
           setFechaCorte(responseClient.data.client.fechaCorte);
           setFechaPago(responseClient.data.client.fechaPago);

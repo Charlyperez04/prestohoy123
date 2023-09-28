@@ -15,24 +15,20 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 import api from "../api/connection";
-import OwnerScreens from "./Owner/NavigatorOwner";
-import ShopScreens from "./Shop/NavigationShop";
-import ClientScreens from "./Client/NavigatorClient";
 import { ScrollView } from "react-native-gesture-handler";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-
-  }),
-});
-
 async function registerForPushNotificationsAsync() {
   let token;
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
+  }
   if (Device.isDevice) {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -45,45 +41,43 @@ async function registerForPushNotificationsAsync() {
       return;
     }
     token = (await Notifications.getExpoPushTokenAsync()).data;
-    AsyncStorage.setItem("userTokenPush", token)
+    AsyncStorage.setItem("userTokenPush", token);
+    console.log(token);
   } else {
     alert("Must use physical device for Push Notifications");
-  }
-  
-  if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
   }
 
   return token;
 }
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 const LoginScreen = ({ navigation, route }) => {
   const { role } = route.params;
-  const {inputName}=route.params
+  const { inputName } = route.params;
   const [modalVisible, setModalVisible] = useState(true);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [expoPushToken, setExpoPushToken] = useState('');
+  const [expoPushToken, setExpoPushToken] = useState("");
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
-    
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+    registerForPushNotificationsAsync().then((token) => setExpoPushToken(token));
+    Notifications.addNotificationReceivedListener((notification) => {
       setNotification(notification);
     });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       console.log(response);
     });
     return () => {
@@ -225,12 +219,7 @@ const LoginScreen = ({ navigation, route }) => {
           <Text style={styles.modalSubtitle}>Ingresa tus credenciales de acceso</Text>
 
           <Text style={styles.inputLabel}>{inputName}</Text>
-          <TextInput
-            style={styles.inputField}
-            placeholder="Nombre"
-            onChangeText={setName}
-            value={name}
-          />
+          <TextInput style={styles.inputField} placeholder="Nombre" onChangeText={setName} value={name} />
 
           <Text style={styles.inputLabel}>Contraseña</Text>
           <TextInput
@@ -363,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: -15,
     backgroundColor: "white",
-    maxWidth:'50%',
+    maxWidth: "50%",
     color: "#6E717C",
     alignSelf: "center",
     marginRight: 160,

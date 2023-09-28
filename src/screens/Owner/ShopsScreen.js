@@ -1,5 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
-import { StackActions } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,7 +16,6 @@ import {
 } from "react-native";
 import arrow from "../../assets/arrow.png";
 import ModalSendNotification from "./Modals/SendNotification";
-import ModalNotificationSent from "./Modals/SentNotification";
 import ModalDeleteShop from "./Modals/ShopDelete";
 import EditShopModal from "./Modals/EditShop";
 import api from "../../api/connection";
@@ -41,16 +38,26 @@ function ShopScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const filterShops = () => {
-      if (searchText.trim() === "") {
-        setFilteredShops(shops);
-      } else {
-        const filtered = shops.filter((shop) => shop.name.toLowerCase().includes(searchText.toLowerCase()));
-        setFilteredShops(filtered);
-      }
-    };
+    if (shops) {
+      // Ordenamos las tiendas
+      const sortedShops = shops.sort((a, b) => a.name.localeCompare(b.name));
 
-    filterShops();
+      // Actualizamos el estado con las tiendas ordenadas
+      setShops(sortedShops);
+    }
+  }, [shops]);
+
+  useEffect(() => {
+    if (shops) {
+      // Filtramos las tiendas si es necesario
+      const filtered =
+        searchText.trim() === ""
+          ? shops
+          : shops.filter((shop) => shop.name.toLowerCase().includes(searchText.toLowerCase()));
+
+      // Actualizamos el estado con las tiendas filtradas
+      setFilteredShops(filtered);
+    }
   }, [searchText, shops]);
 
   useEffect(() => {

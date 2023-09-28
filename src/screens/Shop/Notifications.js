@@ -1,60 +1,48 @@
-import React,{ useEffect, useState }  from "react";
-import { useFonts,    
-    Poppins_100Thin,
-    Poppins_200ExtraLight,
-    Poppins_300Light,
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
-    Poppins_800ExtraBold,
-    Poppins_900Black
-  } from '@expo-google-fonts/poppins';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-} from "react-native";
+  useFonts,
+  Poppins_100Thin,
+  Poppins_200ExtraLight,
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  Poppins_800ExtraBold,
+  Poppins_900Black,
+} from "@expo-google-fonts/poppins";
+import { View, Text, StyleSheet, FlatList, Image } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../api/connection";
-import moment from 'moment'
-
+import moment from "moment";
 
 const NotificationItem = ({ item }) => (
   <View style={styles.item}>
-    <Icon
-      name="bell-outline"
-      style={styles.icon}
-      size={30}
-      color="#FF0083"
-    />
+    <Icon name="bell-outline" style={styles.icon} size={30} color="#FF0083" />
     <View style={styles.content}>
-      <Text style={styles.title}>
-        {item.message}
-      </Text>
-      <Text style={styles.body}>
-      {moment(item.date).subtract(1, "hour").format("YYYY-MM-DD HH:mm")}
-      </Text>
+      <Text style={styles.title}>{item.message}</Text>
+      <Text style={styles.body}>{moment(item.date).subtract(1, "hour").format("YYYY-MM-DD HH:mm")}</Text>
     </View>
   </View>
 );
-function NotificationsScreen  () {
+function NotificationsScreen() {
   const [userToken, setUserToken] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [userId, setUserId] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [notificationsSorted, setNotificationsSorted] = useState([]);
 
-
+  const sortNotifications = () => {
+    setNotificationsSorted(notifications.sort((a, b) => new Date(b.date) - new Date(a.date)));
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
         const role = await AsyncStorage.getItem("userRole");
         const id = await AsyncStorage.getItem("userId");
-  
+
         if (token !== null) {
           setUserToken(token);
         }
@@ -67,49 +55,44 @@ function NotificationsScreen  () {
         if (token !== null && id !== null) {
           // Realizar la petición GET con Axios
           let [response] = await Promise.all([
-            api.get(`/shop/notifications/${id}`, { headers: { Authorization: token } }), 
-
+            api.get(`/shop/notifications/${id}`, { headers: { Authorization: token } }),
           ]);
           console.log(response.data.notifications);
-          setNotifications(response.data.notifications)
-  
+          setNotifications(response.data.notifications);
+          sortNotifications();
           // Actualizar el estado con los datos recibidos
-  
-                }
-      } catch ({error,response}) {
+        }
+      } catch ({ error, response }) {
         console.error(error);
- console.log(response);
+        console.log(response);
       }
     };
-  
+
     fetchData();
   }, []);
-   useFonts({
-        Poppins_100Thin,
-        Poppins_200ExtraLight,
-        Poppins_300Light,
-        Poppins_400Regular,
-        Poppins_500Medium,
-        Poppins_600SemiBold,
-        Poppins_700Bold,
-        Poppins_800ExtraBold,
-        Poppins_900Black
-      });
-      return(
-  <View style={styles.container}>
-    <Text style={styles.header}>
-      Notificaciones
-    </Text>
-    <FlatList
-      style={styles.notificationsList}
-      data={notifications}
-      renderItem={({ item }) => (
-        <NotificationItem item={item} />
-      )}
-      keyExtractor={(item) => item._id}
-    />
-  </View>
-)};
+  useFonts({
+    Poppins_100Thin,
+    Poppins_200ExtraLight,
+    Poppins_300Light,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    Poppins_800ExtraBold,
+    Poppins_900Black,
+  });
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Notificaciones</Text>
+      <FlatList
+        style={styles.notificationsList}
+        data={notificationsSorted}
+        renderItem={({ item }) => <NotificationItem item={item} />}
+        keyExtractor={(item) => item._id}
+      />
+    </View>
+  );
+}
 const styles = StyleSheet.create({
   container: {
     paddingTop: 60,
@@ -145,7 +128,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: "space-between",
-    alignContent:'center'
+    alignContent: "center",
   },
   title: {
     fontSize: 16,

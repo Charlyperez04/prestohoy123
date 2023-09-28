@@ -2,82 +2,78 @@ import React, { useState } from "react";
 import { Modal, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import ModalNotificationSent from "./SentNotification";
 import { TextInput } from "react-native-gesture-handler";
-import api from '../../../api/connection'
+import api from "../../../api/connection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ModalSendNotification = ({ visible, onClose ,idClient,whatIs,tokenPush}) => {
+const ModalSendNotification = ({ visible, onClose, idClient, whatIs, tokenPush }) => {
   const [notificationSent, setNotificationSent] = useState(false);
-  const [e,setE]=useState('')
+  const [e, setE] = useState("");
 
-  const handleSendNotification =async  () => {
-    try{
-    const token = await AsyncStorage.getItem("userToken");
-    if(whatIs==='shop'){
-      const message = {
-        to: tokenPush,
-        sound: 'default',
-        title: 'PrestoHoy',
-        body: e,
-      };
-    
-      await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-      });
-      console.log(idClient);
-      const response = await api.post(
-        `/owner/notificationsShop/${idClient}`,
-        {
-          message: e,
-        },
-        {
+  const handleSendNotification = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (whatIs == "shop") {
+        const message = {
+          to: tokenPush,
+          sound: "default",
+          title: "PrestoHoy",
+          body: e,
+        };
+
+        await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
           headers: {
-            Authorization:token,
+            Accept: "application/json",
+            "Accept-encoding": "gzip, deflate",
+            "Content-Type": "application/json",
           },
-  
-        }
-      );
-      console.log(response.data);
-    setNotificationSent(true);
-    }else{
-      const message = {
-        to: tokenPush,
-        sound: 'default',
-        title: 'PrestoHoy',
-        body: e,
-      };
-    
-      await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-      });
-    const response = await api.post(
-      `/owner/notifications/${idClient}`,
-      {
-        message: e,
-      },
-      {
-        headers: {
-          Authorization:token,
-        },
+          body: JSON.stringify(message),
+        });
+        const response = await api.post(
+          `/owner/notificationsShop/${idClient}`,
+          {
+            message: e,
+          },
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        console.log(response.data);
+        setNotificationSent(true);
+      } else {
+        const message = {
+          to: tokenPush,
+          sound: "default",
+          title: "PrestoHoy",
+          body: e,
+        };
 
+        await fetch("https://exp.host/--/api/v2/push/send", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Accept-encoding": "gzip, deflate",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(message),
+        });
+        const response = await api.post(
+          `/owner/notifications/${idClient}`,
+          {
+            message: e,
+          },
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        setNotificationSent(true);
       }
-    );
-console.log(response.data);
-    setNotificationSent(true);
-  }
-    }catch(e){
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -95,18 +91,19 @@ console.log(response.data);
             <Text style={styles.closeButtonText}>X</Text>
           </TouchableOpacity>
           <Text style={styles.modalTitle}>Inserte el mensaje a enviar</Text>
-            <TextInput placeholder="Mensaje aqui..." style={{
-                height: 50,
-                width: '100%',
-                padding:10,
-                backgroundColor:'#E5E5E5',
-                borderRadius: 10,
-                marginBottom:10
-                
+          <TextInput
+            placeholder="Mensaje aqui..."
+            style={{
+              height: 50,
+              width: "100%",
+              padding: 10,
+              backgroundColor: "#E5E5E5",
+              borderRadius: 10,
+              marginBottom: 10,
             }}
             value={e}
             onChangeText={setE}
-            />
+          />
           <TouchableOpacity style={styles.sendButton} onPress={handleSendNotification}>
             <Text style={styles.sendButtonText}>Enviar</Text>
           </TouchableOpacity>

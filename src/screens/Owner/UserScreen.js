@@ -251,12 +251,7 @@ const UsersScreen = () => {
             value={searchText}
             onChangeText={(text) => setSearchText(text)}
           />
-          <TouchableOpacity
-            style={styles.searchButton}
-            onPress={() => {
-              /* Implementar la lógica de búsqueda aquí... */
-            }}
-          >
+          <TouchableOpacity style={styles.searchButton}>
             <Icon name="magnify" size={30} color="#000" />
           </TouchableOpacity>
         </View>
@@ -446,6 +441,7 @@ const UsersScreen = () => {
                   visible={modalSendNotification}
                   onClose={closeModalNotification}
                   idClient={selectedClient._id}
+                  whatIs={selectedClient.whatIs}
                   tokenPush={selectedClient.tokenNotifications}
                 />
 
